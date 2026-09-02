@@ -1,0 +1,38 @@
+Como adicionar as fotos das receitas do TikTok
+================================================
+
+As 26 receitas do YouTube já mostram a miniatura oficial automaticamente
+(vêm direto do YouTube, não precisa fazer nada).
+
+As 20 receitas do TikTok abaixo ainda não têm foto. Enquanto não houver
+uma imagem com o nome exato abaixo nesta pasta "imagens", o card mostra
+o emoji da categoria (funciona normalmente, só não é uma foto real).
+
+Para adicionar uma foto: tire um print do vídeo (ou baixe uma foto do
+prato pronto), salve como .jpg com o nome exato listado abaixo, e
+coloque dentro desta pasta "imagens".
+
+Lista de arquivos esperados:
+- farofa-cuscuz.jpg
+- macarrao-calabresa-strogonoff.jpg
+- torta-pizza-calabresa.jpg
+- strogonoff-camarao.jpg
+- escondidinho-carne.jpg
+- camarao-cremoso.jpg
+- espaguete-camarao.jpg
+- vaca-atolada.jpg
+- carne-quatro-queijos.jpg
+- macarrao-penne-bacon.jpg
+- massa-file-gorgonzola.jpg
+- arroz-maminha.jpg
+- mini-pizza.jpg
+- fricasse-carne.jpg
+- arroz-fraldinha.jpg
+- arroz-sobrecoxa.jpg
+- tilapia-camarao-banana.jpg
+- salmao-recheado-camarao.jpg
+- salmao-assado.jpg
+- bolo-mesclado.jpg
+
+Assim que você colocar essas fotos nesta pasta, é só publicar de novo
+no Vercel (ou arrastar a pasta inteira de novo) que elas aparecem.

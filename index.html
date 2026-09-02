@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Receitas e Cardápios</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#e8622c">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/icon-32.png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Receitas">
+<style>
+  :root{
+    --bg:#fff8f0; --card:#ffffff; --primary:#e8622c; --primary-dark:#c94f1f;
+    --frango:#f4a836; --carne:#c1443a; --peixe:#3a8fc1; --bolos:#a878c9; --sobremesa:#d9538e; --paes:#b07a3e;
+    --text:#3a2c1f; --muted:#8a7a6a; --border:#eee0d0;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Segoe UI',system-ui,sans-serif;background:var(--bg);color:var(--text);}
+  header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:22px 20px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+  header h1{margin:0;font-size:1.6em;}
+  header p{margin:4px 0 0;opacity:.9;font-size:.9em;}
+  .toolbar{max-width:1100px;margin:16px auto;padding:0 16px;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;}
+  .tabs{display:flex;flex-wrap:wrap;gap:8px;}
+  .tab{padding:8px 14px;border-radius:20px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:.9em;color:var(--text);}
+  .tab.active{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;}
+  button.btn{padding:9px 16px;border-radius:20px;border:none;cursor:pointer;font-weight:600;font-size:.9em;}
+  .btn-primary{background:var(--primary);color:#fff;}
+  .btn-primary:hover{background:var(--primary-dark);}
+  .btn-secondary{background:#fff;color:var(--primary);border:1px solid var(--primary)!important;}
+  #search{padding:8px 12px;border-radius:20px;border:1px solid var(--border);width:200px;}
+  .grid{max-width:1100px;margin:0 auto;padding:0 16px 60px;display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px;}
+  .card{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.06);display:flex;flex-direction:column;}
+  .thumb{height:150px;display:flex;align-items:center;justify-content:center;font-size:3.2em;color:#fff;overflow:hidden;}
+  .thumb img{width:100%;height:100%;object-fit:cover;}
+  .card-body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .badge{align-self:flex-start;font-size:.72em;padding:3px 10px;border-radius:12px;color:#fff;font-weight:600;text-transform:uppercase;letter-spacing:.03em;}
+  .card h3{margin:0;font-size:1.05em;line-height:1.3;}
+  .card .meta{font-size:.8em;color:var(--muted);}
+  .card-actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;}
+  .card-actions button, .card-actions a{font-size:.8em;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:#fff8f0;cursor:pointer;text-decoration:none;color:var(--text);}
+  .card-actions .video{background:var(--primary);color:#fff;border-color:var(--primary);}
+  .card-actions .ing{background:#fff;color:var(--primary);border-color:var(--primary);}
+  .icon-btn{font-size:.78em;padding:5px 8px;opacity:.7;}
+  .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);align-items:center;justify-content:center;z-index:100;padding:20px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:#fff;border-radius:14px;max-width:520px;width:100%;max-height:85vh;overflow-y:auto;padding:24px;}
+  .modal h2{margin-top:0;color:var(--primary-dark);}
+  .modal label{display:block;font-size:.85em;font-weight:600;margin:12px 0 4px;}
+  .modal input, .modal select, .modal textarea{width:100%;padding:9px;border-radius:8px;border:1px solid var(--border);font-family:inherit;font-size:.9em;}
+  .modal textarea{min-height:80px;resize:vertical;}
+  .modal-close{float:right;cursor:pointer;font-size:1.3em;background:none;border:none;color:var(--muted);}
+  .menu-table{width:100%;border-collapse:collapse;margin-top:10px;}
+  .menu-table td,.menu-table th{padding:8px;border-bottom:1px solid var(--border);text-align:left;font-size:.9em;}
+  .menu-table th{color:var(--primary-dark);}
+  .pre{white-space:pre-wrap;font-size:.9em;line-height:1.5;background:#fff8f0;padding:10px;border-radius:8px;}
+  .note{font-size:.78em;color:var(--muted);font-style:italic;}
+  .empty{text-align:center;color:var(--muted);padding:40px;grid-column:1/-1;}
+  footer{text-align:center;padding:20px;color:var(--muted);font-size:.8em;}
+  .portions-box{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;background:#fff3e6;border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin:10px 0;}
+  .portions-box span{font-size:.85em;}
+  .portions-control{display:flex;align-items:center;gap:6px;}
+  .portions-control input{width:56px;text-align:center;padding:6px 4px;}
+  .btn-round{width:30px;height:30px;padding:0!important;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1em;line-height:1;}
+
+  @media (max-width: 600px){
+    header h1{font-size:1.25em;}
+    header p{font-size:.8em;}
+    header{padding:16px 12px;}
+    .toolbar{flex-direction:column;align-items:stretch;}
+    .tabs{justify-content:center;}
+    .actions{flex-wrap:wrap;}
+    #search{flex:1;min-width:0;}
+    .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;padding:0 12px 40px;}
+    .thumb{height:110px;font-size:2.4em;}
+    .card-body{padding:10px;gap:6px;}
+    .card h3{font-size:.95em;}
+    .card-actions button, .card-actions a{font-size:.75em;padding:5px 8px;}
+    .modal{padding:16px;max-height:90vh;}
+    .modal-overlay{padding:10px;}
+  }
+  @media (max-width: 360px){
+    .grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🍲 Receitas e Cardápios</h1>
+  <p>Suas receitas favoritas, organizadas por tipo</p>
+</header>
+
+<div class="toolbar">
+  <div class="tabs" id="tabs"></div>
+  <div class="actions">
+    <input type="text" id="search" placeholder="Buscar receita...">
+    <button class="btn btn-secondary" onclick="openCardapio()">📅 Cardápio</button>
+    <button class="btn btn-primary" onclick="openForm()">+ Nova Receita</button>
+  </div>
+</div>
+
+<div class="grid" id="grid"></div>
+
+<footer>Receitas e Cardápios — feito para você, Fábio 💛</footer>
+
+<!-- Modal: form nova/editar receita -->
+<div class="modal-overlay" id="formOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('formOverlay')">×</button>
+    <h2 id="formTitle">Nova Receita</h2>
+    <input type="hidden" id="editId">
+    <label>Nome da receita</label>
+    <input type="text" id="fNome" placeholder="Ex: Frango à parmegiana">
+    <label>Categoria</label>
+    <select id="fCategoria">
+      <option value="frango">Frango</option>
+      <option value="carne">Carne</option>
+      <option value="peixe">Peixe</option>
+      <option value="bolos">Bolos</option>
+      <option value="sobremesa">Sobremesas</option>
+      <option value="paes">Pães e Lanches</option>
+    </select>
+    <label>Rendimento (porções)</label>
+    <input type="number" id="fPorcoes" min="1" value="4">
+    <label>Link do vídeo (TikTok/YouTube)</label>
+    <input type="text" id="fLink" placeholder="https://...">
+    <label>Ingredientes (um por linha, com quantidade — ex: 500g de frango)</label>
+    <textarea id="fIngredientes" placeholder="500g de frango&#10;2 dentes de alho&#10;..."></textarea>
+    <label>Modo de preparo</label>
+    <textarea id="fModo" placeholder="Descreva o passo a passo"></textarea>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;">
+      <button class="btn btn-secondary" onclick="closeModal('formOverlay')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveRecipe()">Salvar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: ingredientes -->
+<div class="modal-overlay" id="ingOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('ingOverlay')">×</button>
+    <h2 id="ingTitle">Ingredientes</h2>
+    <div class="portions-box">
+      <span>Rendimento original: <strong id="ingBasePortions">4 porções</strong></span>
+      <div class="portions-control">
+        <button class="btn btn-secondary btn-round" onclick="changePortions(-1)">−</button>
+        <input type="number" id="ingPortionsInput" min="1" value="4" oninput="renderScaledIngredients()">
+        <button class="btn btn-secondary btn-round" onclick="changePortions(1)">+</button>
+      </div>
+    </div>
+    <div class="pre" id="ingList"></div>
+    <h3 style="margin-top:16px;">Modo de preparo</h3>
+    <div class="pre" id="modoList"></div>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="shareRecipe(currentIngId)">📤 Compartilhar</button>
+      <button class="btn btn-primary" onclick="closeModal('ingOverlay')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: cardápio -->
+<div class="modal-overlay" id="cardapioOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal('cardapioOverlay')">×</button>
+    <h2>📅 Cardápio da Semana</h2>
+    <p class="note">Sorteado aleatoriamente entre suas receitas salgadas (não inclui Bolos, Sobremesas nem Pães e Lanches).</p>
+    <table class="menu-table" id="cardapioTable"></table>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;">
+      <button class="btn btn-secondary" onclick="openCardapio()">🔀 Sortear de novo</button>
+      <button class="btn btn-secondary" onclick="shareCardapio()">📤 Compartilhar</button>
+      <button class="btn btn-primary" onclick="closeModal('cardapioOverlay')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const CATS = {
+  frango:{label:'Frango', color:'var(--frango)', emoji:'🍗'},
+  carne:{label:'Carne', color:'var(--carne)', emoji:'🥩'},
+  peixe:{label:'Peixe', color:'var(--peixe)', emoji:'🐟'},
+  bolos:{label:'Bolos', color:'var(--bolos)', emoji:'🎂'},
+  sobremesa:{label:'Sobremesas', color:'var(--sobremesa)', emoji:'🍮'},
+  paes:{label:'Pães e Lanches', color:'var(--paes)', emoji:'🥐'}
+};
+// Categorias fora do cardápio semanal (não são pratos principais de almoço/jantar)
+const CATEGORIAS_FORA_DO_CARDAPIO = ['bolos','sobremesa','paes'];
+
+// Receitas semeadas a partir dos links enviados.
+// Ingredientes, quantidades, rendimento (porções) e modo de preparo revisados.
+const IMG_BASE = 'imagens/';
+function yt(id){ return 'https://i.ytimg.com/vi/'+id+'/hqdefault.jpg'; }
+
+const SEED_RECIPES = [
+  // ---- YouTube ----
+  {nome:'Bobó de Camarão', categoria:'peixe', porcoes:4, link:'https://youtu.be/yxjf1uYxsGQ?list=PLBOWFXnm1_bB6fqn3Rb6jnSEmkne7wStr', imagem:yt('yxjf1uYxsGQ'),
+   ingredientes:'1 kg de camarão limpo (com ou sem casca)\n1 kg de mandioca (aipim), cozida e amassada\n1 vidro (500ml) de leite de coco\n1 cebola picada\n3 dentes de alho picados\n2 tomates picados\n1 pimentão (verde ou vermelho) picado\n3 colheres (sopa) de azeite de dendê\n1/2 xícara de coentro e cebolinha picados\nSuco de 1 limão\nSal a gosto',
+   modo:'Tempere o camarão com limão, alho e sal e deixe descansar. Cozinhe a mandioca até ficar bem macia e amasse até virar um purê, misturando metade do leite de coco. Em outra panela, refogue cebola, alho, tomate e pimentão no azeite. Adicione o camarão e cozinhe até mudar de cor. Junte o purê de mandioca, o restante do leite de coco e o azeite de dendê, mexendo até engrossar e ferver. Finalize com coentro e cebolinha. Sirva com arroz branco.'},
+  {nome:'Mousse de Chocolate Levíssima (4 Ingredientes)', categoria:'sobremesa', porcoes:8, link:'https://youtu.be/ByCFHzqVEiY?list=PLBOWFXnm1_bC8hOyQAptrVE3t6E1r5vaC', imagem:yt('ByCFHzqVEiY'),
+   ingredientes:'320g de chocolate meio amargo\n2 caixinhas (400g) de creme de leite\n4 claras (140g)\n2 colheres (sopa) rasas de açúcar (23g)',
+   modo:'Derreta o chocolate em banho-maria ou no micro-ondas. Misture o creme de leite ao chocolate derretido até obter um creme liso. Bata as claras em neve com o açúcar até formar picos firmes. Incorpore as claras ao creme de chocolate delicadamente, com movimentos de baixo para cima, até ficar homogêneo. Distribua em taças e leve à geladeira por pelo menos 3 horas antes de servir.'},
+  {nome:'Brownie de Frigideira Fácil', categoria:'bolos', porcoes:4, link:'https://youtu.be/KPu2rZOaZDc?list=PLBOWFXnm1_bC8hOyQAptrVE3t6E1r5vaC', imagem:yt('KPu2rZOaZDc'),
+   ingredientes:'125g de chocolate meio amargo picado\n4 colheres (sopa) de manteiga sem sal\n3/4 de xícara (chá) de açúcar\n2 ovos\n3/4 de xícara (chá) de farinha de trigo\n2 colheres (sopa) de cacau em pó\n1 pitada de sal',
+   modo:'Derreta a manteiga com o chocolate picado em fogo baixo. Retire do fogo, misture o açúcar, depois os ovos. Junte a farinha, o cacau e o sal. Volte à frigideira (com tampa) em fogo baixo por 10-12 minutos, até firmar nas bordas e ficar úmido no centro.'},
+  {nome:'Bolinho de Arroz e Batata Recheado', categoria:'paes', porcoes:5, link:'https://youtu.be/wWrq41ki18k?list=PLBOWFXnm1_bDGdk7OMI3BZXqyPIb-Fi6j', imagem:yt('wWrq41ki18k'),
+   ingredientes:'3 xícaras (chá) de arroz cozido (sobra)\n3 batatas pequenas (aprox. 300g), cozidas e amassadas\n1 colher (chá) rasa de sal\n1 pitada de orégano\n2 colheres (sopa) de cheiro-verde picado\n100g de queijo muçarela para rechear\nÓleo para fritar (rende aproximadamente 15 bolinhos)',
+   modo:'Cozinhe as batatas, escorra e amasse. Misture com o arroz cozido, sal, orégano e cheiro-verde. Modele bolinhos, recheie com queijo e frite em óleo bem quente até dourar.'},
+  {nome:'Batatas Assadas Crocantes', categoria:'paes', porcoes:4, link:'https://youtu.be/rwyEPcWUR60', imagem:yt('rwyEPcWUR60'),
+   ingredientes:'1 kg de batatas médias, descascadas e cortadas em pedaços\n3 colheres (sopa) de azeite\n3 dentes de alho picados\n1 colher (chá) de sal\nPimenta-do-reino a gosto\n1 colher (chá) de orégano',
+   modo:'Pré-cozinhe as batatas em água fervente com sal por 8-10 minutos, até ficarem macias por fora mas firmes por dentro. Escorra bem e sacuda na peneira para criar ranhuras na superfície (isso deixa mais crocante). Tempere com azeite, alho, sal, pimenta e orégano. Espalhe em uma assadeira sem sobrepor e leve ao forno preaquecido a 220°C por 35-40 minutos, virando na metade do tempo, até dourar e ficar crocante.'},
+  {nome:'Molho de Tomate Caseiro Fácil e Rápido', categoria:'paes', porcoes:6, link:'https://youtu.be/FqgC9--qNFU', imagem:yt('FqgC9--qNFU'),
+   ingredientes:'1 kg de tomates maduros, sem pele e picados\n1 cebola picada\n3 dentes de alho picados\n3 colheres (sopa) de azeite\n1 colher (chá) de açúcar\nSal a gosto\nFolhas de manjericão a gosto',
+   modo:'Refogue a cebola e o alho no azeite até dourarem levemente. Adicione os tomates picados, o açúcar e o sal. Cozinhe em fogo médio-baixo por 25-30 minutos, mexendo de vez em quando, até o molho encorpar. Se preferir mais liso, bata no liquidificador antes de voltar ao fogo por mais 5 minutos. Finalize com manjericão fresco.'},
+  {nome:'Picolé Caseiro tipo Magnum', categoria:'sobremesa', porcoes:8, link:'https://youtu.be/Bfbsu2tRPrY', imagem:yt('Bfbsu2tRPrY'),
+   ingredientes:'500ml de creme de leite fresco bem gelado\n1 lata de leite condensado\n1 colher (chá) de essência de baunilha\n300g de chocolate meio amargo picado (casquinha)\n2 colheres (sopa) de óleo\n8 palitos de picolé',
+   modo:'Bata o creme de leite fresco até formar picos firmes. Misture delicadamente com o leite condensado e a baunilha. Despeje em forminhas de picolé, insira os palitos e leve ao congelador por pelo menos 6 horas. Derreta o chocolate com o óleo em banho-maria. Desenforme os picolés e mergulhe rapidamente no chocolate derretido para formar a casquinha. Volte ao congelador por 10 minutos antes de servir.'},
+  {nome:'Bolo Mousse Supreme de Limão e Chocolate', categoria:'bolos', porcoes:12, link:'https://youtu.be/j2UBK_SPguQ', imagem:yt('j2UBK_SPguQ'),
+   ingredientes:'1 massa de bolo de chocolate pronta ou caseira (aprox. 500g)\n1 lata de leite condensado (mousse de limão)\nSuco de 4 limões\n2 caixinhas de creme de leite\n200g de chocolate meio amargo derretido (mousse de chocolate)\n3 claras em neve\nChantilly e raspas de limão para decorar',
+   modo:'Prepare a massa de bolo e deixe esfriar. Para a mousse de limão, bata o leite condensado com o suco de limão até engrossar e incorpore uma caixinha de creme de leite. Para a mousse de chocolate, misture o chocolate derretido com a outra caixinha de creme de leite e incorpore as claras em neve delicadamente. Em uma travessa, monte camadas alternando o bolo esfarelado com as duas mousses. Leve à geladeira por pelo menos 3 horas. Decore com chantilly e raspas de limão antes de servir.'},
+  {nome:'Arroz Doce Tradicional', categoria:'sobremesa', porcoes:6, link:'https://youtu.be/EYsJYCYnppI', imagem:yt('EYsJYCYnppI'),
+   ingredientes:'1 xícara (chá) de arroz\n1 litro de leite\n1 xícara (chá) de açúcar\n1 pau de canela\n2 cravos-da-índia (opcional)\nCanela em pó para polvilhar',
+   modo:'Cozinhe o arroz em água até ficar macio e escorra. Volte o arroz à panela com o leite, o açúcar, a canela em pau e os cravos. Cozinhe em fogo baixo, mexendo sempre, até engrossar e ficar cremoso (cerca de 20-25 minutos). Retire a canela e os cravos, distribua em potinhos e polvilhe canela em pó por cima.'},
+  {nome:'Salmão ao Molho de Maracujá em 15 Minutos', categoria:'peixe', porcoes:4, link:'https://youtu.be/kpsLvbKgoIo', imagem:yt('kpsLvbKgoIo'),
+   ingredientes:'4 filés de salmão (aprox. 150g cada)\nSal e pimenta-do-reino a gosto\n2 colheres (sopa) de manteiga\nSuco de 3 maracujás (ou 200ml de suco concentrado)\n2 colheres (sopa) de mel\n1 colher (sopa) de amido de milho dissolvido em água (opcional)',
+   modo:'Tempere os filés de salmão com sal e pimenta. Doure na manteiga em fogo alto por 3-4 minutos de cada lado, até ficar com a pele crocante. Retire o salmão e reserve. Na mesma frigideira, adicione o suco de maracujá e o mel, deixando reduzir por 3-4 minutos. Se quiser um molho mais encorpado, adicione o amido dissolvido e cozinhe até engrossar. Volte o salmão à frigideira, regue com o molho e sirva imediatamente.'},
+  {nome:'Arroz de Forno Completo', categoria:'frango', porcoes:6, link:'https://youtu.be/gLGRXBnSZfE', imagem:yt('gLGRXBnSZfE'),
+   ingredientes:'3 xícaras (chá) de arroz cozido\n2 xícaras (chá) de frango desfiado temperado\n1 lata de milho\n1 xícara (chá) de ervilha\n200g de requeijão cremoso\n200g de queijo muçarela ralado\n2 colheres (sopa) de cheiro-verde picado',
+   modo:'Misture o arroz cozido com o frango desfiado, o milho, a ervilha e metade do requeijão. Tempere e ajuste o sal. Coloque em um refratário untado, cubra com o restante do requeijão e o queijo muçarela. Leve ao forno preaquecido a 200°C por 20-25 minutos, até gratinar. Finalize com cheiro-verde.'},
+  {nome:'Almoço Rápido em 30 Minutos', categoria:'carne', porcoes:4, link:'https://youtu.be/EeM3XEQtrkg', imagem:yt('EeM3XEQtrkg'),
+   ingredientes:'500g de carne em cubos ou tiras\n1 cebola picada\n3 dentes de alho picados\n2 tomates picados\nSal, pimenta-do-reino e temperos a gosto\nArroz e feijão prontos para acompanhar',
+   modo:'Tempere a carne com sal, pimenta e alho. Refogue a cebola e o alho até dourar, adicione a carne e sele em fogo alto. Junte os tomates picados e cozinhe em fogo médio até a carne ficar macia e o molho encorpar, cerca de 15-20 minutos. Sirva com arroz e feijão.'},
+  {nome:'Pizza Domino\'s em Casa (Massa Pan)', categoria:'paes', porcoes:4, link:'https://youtu.be/sosvzu1A2z0', imagem:yt('sosvzu1A2z0'),
+   ingredientes:'2 xícaras (chá) de farinha de trigo\n1 colher (sopa) de fermento biológico seco\n1 colher (sopa) de açúcar\n1 colher (chá) de sal\n3/4 xícara de água morna\n2 colheres (sopa) de azeite\n200g de molho de tomate, 200g de queijo muçarela e pepperoni a gosto (cobertura)',
+   modo:'Misture a água morna com o fermento e o açúcar e deixe espumar por 5 minutos. Junte a farinha, o sal e o azeite, sovando até obter uma massa lisa e elástica. Deixe descansar coberta por 1 hora, até dobrar de volume. Abra a massa em uma forma untada, formando uma pizza mais alta nas bordas (estilo Pan). Cubra com molho de tomate, queijo e pepperoni. Asse a 220°C por 15-20 minutos, até a base dourar e o queijo derreter.'},
+  {nome:'Ragù de Linguiça (O Poderoso Chefão)', categoria:'carne', porcoes:6, link:'https://youtu.be/Hkh9eZSqgKo', imagem:yt('Hkh9eZSqgKo'),
+   ingredientes:'500g de linguiça toscana, sem a pele e esfarelada\n1 cebola picada\n3 dentes de alho picados\n2 latas de tomate pelado picado\n1/2 xícara de vinho tinto\n2 colheres (sopa) de azeite\nSal, pimenta e manjericão a gosto\nMassa a gosto para acompanhar',
+   modo:'Doure a linguiça esfarelada no azeite até soltar a gordura e ficar bem dourada. Retire e reserve. Na mesma panela, refogue a cebola e o alho, deglace com o vinho tinto e deixe evaporar o álcool. Volte a linguiça à panela, junte o tomate pelado e cozinhe em fogo baixo por 40-50 minutos, até o molho encorpar. Tempere com sal, pimenta e manjericão. Sirva sobre a massa cozida.'},
+  {nome:'Rondelli de Queijo e Presunto', categoria:'carne', porcoes:6, link:'https://youtu.be/YX3U_SHFQQg', imagem:yt('YX3U_SHFQQg'),
+   ingredientes:'12 fatias de massa de lasanha fresca (ou massa de pastel)\n12 fatias de presunto\n12 fatias de queijo muçarela\n500g de molho de tomate\n100g de queijo parmesão ralado\nOrégano a gosto',
+   modo:'Cozinhe as fatias de massa de lasanha em água fervente com sal até ficarem macias (ou use massa de pastel crua). Sobre cada fatia, coloque uma fatia de presunto e uma de queijo muçarela, e enrole formando um rondelli. Espalhe uma camada de molho de tomate no fundo de um refratário, arrume os rondelli em pé, cubra com o restante do molho e polvilhe queijo parmesão e orégano. Leve ao forno preaquecido a 200°C por 20-25 minutos, até gratinar.'},
+  {nome:'Bolo Mesclado Simples e Fofinho', categoria:'bolos', porcoes:10, link:'https://youtu.be/iKNe4rAVnuA', imagem:yt('iKNe4rAVnuA'),
+   ingredientes:'3 ovos\n1 e 1/2 xícara (chá) de açúcar\n1/2 xícara (chá) de óleo\n1 xícara (chá) de leite\n2 e 1/2 xícaras (chá) de farinha de trigo\n1 colher (sopa) de fermento em pó\n3 colheres (sopa) de chocolate em pó',
+   modo:'Bata os ovos com o açúcar e o óleo até esbranquiçar. Adicione o leite e, aos poucos, a farinha peneirada com o fermento. Separe 1/3 da massa e misture com o chocolate em pó. Em uma forma untada, intercale colheradas da massa branca e da massa de chocolate, fazendo desenhos com um garfo. Asse a 180°C por 40-45 minutos, até o palito sair limpo.'},
+  {nome:'Bolo Cremosão de Chocolate', categoria:'bolos', porcoes:12, link:'https://youtu.be/uJ85cBeO5zE', imagem:yt('uJ85cBeO5zE'),
+   ingredientes:'3 ovos\n2 xícaras (chá) de açúcar\n1 xícara (chá) de óleo\n1 xícara (chá) de leite\n2 xícaras (chá) de farinha de trigo\n1 xícara (chá) de chocolate em pó\n1 colher (sopa) de fermento em pó\n1 lata de leite condensado (recheio)\n1 caixinha de creme de leite (recheio)\n3 colheres (sopa) de chocolate em pó (recheio)\n1 colher (sopa) de manteiga (recheio)',
+   modo:'Bata os ingredientes da massa e asse em forma untada a 180°C por 35-40 minutos. Para o recheio, leve o leite condensado, o chocolate em pó e a manteiga ao fogo, mexendo até engrossar; desligue e misture o creme de leite. Fure o bolo ainda morno com um garfo e regue com o creme cremoso, deixando penetrar. Leve à geladeira antes de servir.'},
+  {nome:'Bolo de Laranja Fofinho e Úmido', categoria:'bolos', porcoes:10, link:'https://youtu.be/rX3Scrr2Ots', imagem:yt('rX3Scrr2Ots'),
+   ingredientes:'3 ovos\n1 xícara (chá) de óleo\n1 e 1/2 xícara (chá) de açúcar\n1 xícara (chá) de suco de laranja\nRaspas de 1 laranja\n2 e 1/2 xícaras (chá) de farinha de trigo\n1 colher (sopa) de fermento em pó',
+   modo:'Bata no liquidificador os ovos, o óleo, o açúcar, o suco e as raspas de laranja. Transfira para uma tigela e incorpore a farinha peneirada com o fermento, misturando delicadamente. Despeje em forma untada e asse a 180°C por 35-40 minutos, até dourar e o palito sair limpo.'},
+  {nome:'Pão de Hambúrguer do Madero', categoria:'paes', porcoes:8, link:'https://youtu.be/Hk5nBZjso7Y', imagem:yt('Hk5nBZjso7Y'),
+   ingredientes:'500g de farinha de trigo\n2 ovos\n2 colheres (sopa) de manteiga\n1 xícara (chá) de leite morno\n1 colher (sopa) de fermento biológico seco\n2 colheres (sopa) de açúcar\n1 colher (chá) de sal\nGergelim para polvilhar (rende 8 pães)',
+   modo:'Misture o leite morno, o fermento e o açúcar e deixe espumar. Junte os ovos, a manteiga, a farinha e o sal, sovando até obter uma massa lisa. Deixe crescer coberta por 1 hora. Divida em 8 porções, modele os pães e deixe crescer novamente por 30 minutos. Pincele com ovo, polvilhe gergelim e asse a 180°C por 15-18 minutos, até dourar.'},
+  {nome:'Pão de Leite Condensado com Coco (Fatia Húngara)', categoria:'bolos', porcoes:10, link:'https://youtu.be/HPgZT6sBIJY', imagem:yt('HPgZT6sBIJY'),
+   ingredientes:'1 lata de leite condensado\n2 ovos\n1/2 xícara (chá) de óleo\n100g de coco ralado\n2 e 1/2 xícaras (chá) de farinha de trigo\n1 colher (sopa) de fermento em pó\nCoco ralado extra para polvilhar',
+   modo:'Bata o leite condensado, os ovos e o óleo. Misture o coco ralado e, aos poucos, a farinha peneirada com o fermento. Despeje em forma retangular untada, polvilhe coco ralado por cima e asse a 180°C por 30-35 minutos. Corte em fatias após esfriar.'},
+  {nome:'Chocotone Profissional', categoria:'bolos', porcoes:12, link:'https://youtu.be/2MhjYZcRa4s', imagem:yt('2MhjYZcRa4s'),
+   ingredientes:'500g de farinha de trigo\n100g de açúcar\n2 ovos\n100g de manteiga\n1 xícara (chá) de leite morno\n15g de fermento biológico seco\n200g de gotas de chocolate\n50g de passas (opcional)',
+   modo:'Misture o leite morno, o fermento e um pouco do açúcar e deixe espumar. Junte os ovos, a manteiga e o restante do açúcar, incorpore a farinha aos poucos e sove até obter uma massa lisa e elástica. Adicione as gotas de chocolate e as passas. Deixe crescer coberta por 1h30, até dobrar de volume. Coloque em forma de panetone e deixe crescer mais 40 minutos. Asse a 180°C por 30-35 minutos.'},
+  {nome:'Mousse de Chocolate para a Ceia', categoria:'sobremesa', porcoes:8, link:'https://youtu.be/sJHQcPqIJ1g', imagem:yt('sJHQcPqIJ1g'),
+   ingredientes:'200g de chocolate meio amargo picado\n1 caixinha (200g) de creme de leite\n3 claras em neve\n2 colheres (sopa) de açúcar',
+   modo:'Derreta o chocolate em banho-maria e misture o creme de leite até obter um creme liso. Bata as claras em neve com o açúcar até formar picos firmes. Incorpore delicadamente as claras ao chocolate, com movimentos de baixo para cima. Distribua em taças e leve à geladeira por pelo menos 3 horas antes de servir.'},
+  {nome:'Sobremesa Cremosa de Ninho Trufado', categoria:'sobremesa', porcoes:8, link:'https://youtu.be/uFrf4TX0RtY', imagem:yt('uFrf4TX0RtY'),
+   ingredientes:'1 lata de leite condensado\n1 caixinha (200g) de creme de leite\n4 colheres (sopa) de leite em pó (Ninho)\n100g de chocolate branco derretido\n2 colheres (sopa) de chocolate ralado para trufar',
+   modo:'Bata o leite condensado, o creme de leite e o leite em pó até formar um creme homogêneo. Incorpore o chocolate branco derretido. Distribua em taças, finalize com chocolate ralado ou granulado e leve à geladeira por pelo menos 2 horas antes de servir.'},
+  {nome:'Torta de Limão sem Gelatina', categoria:'sobremesa', porcoes:10, link:'https://youtu.be/UtEOrkqS-fA', imagem:yt('UtEOrkqS-fA'),
+   ingredientes:'200g de biscoito tipo maisena triturado\n100g de manteiga derretida\n1 lata de leite condensado\nSuco de 4 limões\n1 caixinha (200g) de creme de leite\nChantilly e raspas de limão para decorar',
+   modo:'Misture o biscoito triturado com a manteiga derretida e forre o fundo de uma forma de aro removível, pressionando bem. Leve à geladeira por 15 minutos. Bata o leite condensado com o suco de limão até engrossar e incorpore o creme de leite. Despeje sobre a base de biscoito e leve à geladeira por pelo menos 4 horas. Decore com chantilly e raspas de limão antes de servir.'},
+  {nome:'Curau/Canjica sem Amido, Gelatina ou Leite Condensado', categoria:'sobremesa', porcoes:6, link:'https://youtu.be/8K-HnQgWINY', imagem:yt('8K-HnQgWINY'),
+   ingredientes:'4 espigas de milho verde (ou 3 xícaras de milho verde debulhado)\n1 litro de leite\n1 xícara (chá) de açúcar\n1 pau de canela\nCanela em pó para polvilhar',
+   modo:'Bata o milho verde com um pouco do leite no liquidificador e coe para retirar a casquinha. Leve ao fogo com o restante do leite, o açúcar e a canela em pau, mexendo sempre até engrossar naturalmente (cerca de 20-25 minutos). Distribua em potinhos e polvilhe canela em pó por cima.'},
+  {nome:'Mousse de Maracujá com Chocolate', categoria:'sobremesa', porcoes:8, link:'https://youtu.be/WBKuF_mZmRo', imagem:yt('WBKuF_mZmRo'),
+   ingredientes:'Suco de 4 maracujás (ou 300ml de suco concentrado)\n1 lata de leite condensado\n1 caixinha (200g) de creme de leite\n150g de chocolate meio amargo derretido',
+   modo:'Bata o suco de maracujá com o leite condensado e o creme de leite até obter um creme homogêneo. Em taças, alterne camadas do creme de maracujá com o chocolate derretido. Leve à geladeira por pelo menos 3 horas antes de servir.'},
+
+  // ---- TikTok ----
+  {nome:'Farofa de Cuscuz com Calabresa, Bacon, Banana e Queijo', categoria:'carne', porcoes:6, link:'https://www.tiktok.com/@raphaelcamposo/video/7662387323631422740?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'farofa-cuscuz.jpg',
+   ingredientes:'2 xícaras de flocão de milho\n1 xícara de água morna\n3 bananas pacovã (banana da terra), em rodelas\n200g de bacon em cubos\n1 linguiça calabresa em rodelas\n200g de queijo coalho em cubos\n1/2 cebola roxa picada\n1 dente de alho picado\n1 colher (sopa) de manteiga\n2 colheres (sopa) de cheiro-verde a gosto\n1/2 xícara de leite de coco',
+   modo:'Hidrate o flocão de milho com a água morna e reserve por 5 minutos. Em uma panela, frite o bacon até dourar, adicione a linguiça calabresa em rodelas e a banana em pedaços, refogando até dourar. Junte a cebola e o alho e refogue mais um pouco. Adicione o flocão hidratado, a manteiga e o leite de coco, mexendo até soltar da panela. Finalize com o queijo coalho em cubos e cheiro-verde, misturando levemente para o queijo amolecer.'},
+  {nome:'Macarrão Cremoso de Calabresa com Molho de Strogonoff', categoria:'carne', porcoes:4, link:'https://www.tiktok.com/@freitassgabriell/video/7670280249346936084?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'macarrao-calabresa-strogonoff.jpg',
+   ingredientes:'2 colheres (sopa) de azeite ou óleo\n4 dentes de alho laminados\n2 gomos de linguiça calabresa triturada\n1 cebola picada\n1 colher (chá) de páprica\n1 colher (chá) de orégano\n2 sachês (300g cada) de molho de tomate\n2 colheres (sopa) de ketchup\n2 colheres (sopa) de mostarda\n2 colheres (sopa) de molho inglês\n2 colheres (sopa) de cheiro-verde\n2 caixinhas de creme de leite\n1 copo (200g) de requeijão cremoso\n1 pacote (500g) de macarrão (tipo talharim)\nÁgua do cozimento do macarrão (se necessário)',
+   modo:'Cozinhe o macarrão até al dente, reservando um pouco da água. Refogue o alho no azeite, junte a calabresa triturada e a cebola até dourar. Tempere com páprica e orégano. Adicione o molho de tomate, ketchup, mostarda e molho inglês, cozinhando alguns minutos. Reduza o fogo e incorpore o creme de leite e o requeijão até ficar cremoso. Misture o macarrão ao molho e finalize com cheiro-verde.'},
+  {nome:'Torta Pizza de Calabresa (no Liquidificador)', categoria:'paes', porcoes:8, link:'https://www.tiktok.com/@freitassgabriell/video/7650252447289543957?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'torta-pizza-calabresa.jpg',
+   ingredientes:'Massa: 1 lata de milho (sem a conserva)\n3 ovos\n1/2 xícara (chá) de óleo\n1 xícara (chá/240ml) de leite integral\n1/2 colher (chá) de sal\n1/2 xícara (chá) de amido de milho\n2 xícaras (chá) de farinha de trigo sem fermento\n1 colher (sopa) de fermento químico\nRecheio: 250g de queijo muçarela\n1 linguiça calabresa em rodelas\n1/2 cebola fatiada\n3 colheres (sopa) de molho de tomate\n1 colher (chá) de orégano\nPimenta calabresa a gosto (opcional)',
+   modo:'Bata todos os ingredientes da massa no liquidificador até homogeneizar. Despeje em uma forma untada, cubra com o recheio (muçarela, calabresa, cebola, molho de tomate e orégano) e leve ao forno médio (200°C) por 35-40 minutos, até dourar e a massa ficar cozida por dentro.'},
+  {nome:'Strogonoff de Camarão', categoria:'peixe', porcoes:4, link:'https://www.tiktok.com/@thigas/video/7635760652102978824?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'strogonoff-camarao.jpg',
+   ingredientes:'500g de camarão\nSal e pimenta-do-reino a gosto\nSuco de 1 limão\n2 colheres (sopa) de azeite\n1 cebola picada\n1/2 sachê de molho de tomate\n2 colheres (sopa) de mostarda\n200g de creme de leite\n2 colheres (sopa) de cheiro-verde\nArroz e batata palha para acompanhar',
+   modo:'Tempere o camarão com sal, pimenta e limão. Refogue a cebola no azeite até translúcida, junte o camarão e cozinhe rapidamente até mudar de cor (3-5 min, sem passar do ponto). Acrescente o molho de tomate e a mostarda, misture bem. Reduza o fogo e adicione o creme de leite até formar um molho cremoso. Finalize com cheiro-verde e sirva com arroz e batata palha.'},
+  {nome:'Escondidinho de Carne', categoria:'carne', porcoes:6, link:'https://www.tiktok.com/@thigas/video/7638357807376420112?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'escondidinho-carne.jpg',
+   ingredientes:'1 cebola picada\n6 dentes de alho picados\n1 colher (sopa) de colorau\n600g de carne moída\nSal e pimenta-do-reino a gosto\n1 colher (chá) de páprica defumada\n1 sachê de molho de tomate\n2 colheres (sopa) de ketchup\n2 colheres (sopa) de salsinha\n4 batatas\n200g de creme de leite\n2 colheres (sopa) de manteiga\n200g de queijo muçarela',
+   modo:'Refogue a cebola e o alho no óleo, tempere com colorau, sal, pimenta e páprica. Adicione a carne moída e cozinhe até dourar bem. Junte o molho de tomate e o ketchup, cozinhando por mais alguns minutos, e finalize com salsinha. Cozinhe as batatas até ficarem macias, amasse e misture com o creme de leite e a manteiga até formar um purê cremoso. Em um refratário, coloque a carne moída, cubra com o purê de batata e finalize com queijo muçarela. Leve ao forno a 200°C por 15-20 minutos, até gratinar.'},
+  {nome:'Camarão Cremoso', categoria:'peixe', porcoes:4, link:'https://www.tiktok.com/@thigas/video/7652831721443937544?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'camarao-cremoso.jpg',
+   ingredientes:'1 kg de camarão\nSal e pimenta-do-reino a gosto\n1 pimentão colorido picado\n1 cebola e 3 dentes de alho picados\n300ml de creme de leite ou requeijão para o molho cremoso\n2 colheres (sopa) de cheiro-verde',
+   modo:'Refogue o camarão com cebola, alho e pimentões coloridos. Finalize despejando o creme/molho cremoso por cima e misture até envolver bem o camarão.'},
+  {nome:'Espaguete Molhadinho com Camarão', categoria:'peixe', porcoes:4, link:'https://www.tiktok.com/@chefeandrezao/video/7590501172297862408?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'espaguete-camarao.jpg',
+   ingredientes:'480g de camarão (média de 120g por pessoa)\n400g de massa seca tipo espaguete (100g por pessoa)\n300g de molho de tomate vermelho\n100ml de creme de leite fresco (opcional)\n1 xícara de água (adicionar aos poucos)\n1 pitada de bicarbonato de sódio (se o molho ficar ácido)\nSal e pimenta a gosto',
+   modo:'Refogue o camarão temperado. Adicione o molho de tomate e vá acrescentando água aos poucos até o ponto desejado da massa — não retire depois de adicionar. Cozinhe a massa junto ou à parte e misture. Se quiser, finalize com creme de leite fresco para deixar mais cremoso. Se o molho ficar ácido por causa do tomate, adicione uma pitada de bicarbonato de sódio.'},
+  {nome:'Vaca Atolada (Costela com Mandioca na Pressão)', categoria:'carne', porcoes:6, link:'https://www.tiktok.com/@chefeandrezao/video/7653579145913453842?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'vaca-atolada.jpg',
+   ingredientes:'1 kg de costela\n1 kg de mandioca\nSal e pimenta a gosto\n1 cebola e 2 dentes de alho (temperos)',
+   modo:'Cozinhe a costela temperada na panela de pressão por 20 minutos. Abra a panela, adicione a mandioca e cozinhe por mais 30 minutos, até a carne desmanchar e o caldo encorpar.'},
+  {nome:'Carne ao Molho Quatro Queijos', categoria:'carne', porcoes:4, link:'https://www.tiktok.com/@thigas/video/7646893037724912914?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'carne-quatro-queijos.jpg',
+   ingredientes:'2 colheres (sopa) de azeite\n500g de carne (a gosto)\nSal e pimenta-do-reino a gosto\n1 cebola picada\n2 dentes de alho picados\n1 alho-poró fatiado\n200g de creme de leite\n100g de queijo parmesão\n100g de queijo muçarela\n100g de queijo gorgonzola\n1/2 xícara de leite\n2 colheres (sopa) de cheiro-verde',
+   modo:'Tempere a carne com sal e pimenta e sele no azeite até dourar. Retire e reserve. Na mesma panela, refogue a cebola, o alho e o alho-poró. Volte a carne à panela, adicione o creme de leite e um pouco de leite, deixando aquecer. Junte os queijos parmesão, muçarela e gorgonzola, mexendo até derreterem e formarem um molho cremoso. Finalize com cheiro-verde e sirva imediatamente.'},
+  {nome:'Macarrão (Penne) com Carne Moída e Bacon', categoria:'carne', porcoes:4, link:'https://www.tiktok.com/@chefeandrezao/video/7666197646150733063?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'macarrao-penne-bacon.jpg',
+   ingredientes:'300g de carne moída\n150g de bacon\n600g de passata de tomate\n1/2 cenoura ralada\n1 cebola picada\n6 dentes de alho picados\n2 colheres (sopa) de azeite\n400g de macarrão tipo penne\n1 xícara de água fervente\nParmesão e salsinha para finalizar',
+   modo:'Refogue o bacon, a cebola e o alho no azeite. Junte a carne moída e doure bem. Rale a cenoura e adicione (ajuda a equilibrar a acidez do molho). Acrescente a passata de tomate e um pouco de água fervente, cozinhando até engrossar. Cozinhe o penne na mesma panela ou à parte, misture ao molho e finalize com parmesão e salsinha.'},
+  {nome:'Massa com Filé Mignon e Molho de Gorgonzola', categoria:'carne', porcoes:4, link:'https://www.tiktok.com/@chefeandrezao/video/7662486451786960135?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'massa-file-gorgonzola.jpg',
+   ingredientes:'400g de filé mignon (100g por pessoa)\n400g de massa seca\n240g de queijo gorgonzola (60g por pessoa)\n500g de creme de leite fresco\n1 pitada de noz-moscada\nSal e pimenta-do-reino a gosto\n2 colheres (sopa) de manteiga\n50g de parmesão (opcional)',
+   modo:'Sele o filé mignon em fogo alto até dourar bem. Prepare o molho derretendo o gorgonzola no creme de leite fresco com manteiga e noz-moscada. Cozinhe a massa, misture ao molho e finalize com o filé por cima. Ajuste com parmesão se quiser um sabor mais suave.'},
+  {nome:'Arroz de Maminha', categoria:'carne', porcoes:6, link:'https://www.tiktok.com/@thigas/video/7637244787673943312?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'arroz-maminha.jpg',
+   ingredientes:'2 colheres (sopa) de azeite\n200g de bacon\n1,5 kg de maminha em pedaços\n2 cebolas picadas\n5 dentes de alho picados\n1 pimentão verde picado\n1/2 xícara de molho inglês\n1 colher (sopa) de páprica defumada\nSal e pimenta-do-reino a gosto\n3 tomates picados\n3 folhas de louro\n1 litro de água\n1 e 1/2 xícara de arroz\n200g de queijo parmesão\n2 colheres (sopa) de cheiro-verde',
+   modo:'Refogue o bacon, junte a maminha em pedaços e doure bem com cebola, alho e pimentão. Tempere com páprica, sal e pimenta. Adicione tomates, louro e água suficiente, cozinhando até a carne ficar macia e desfiar. Junte o arroz e cozinhe até secar. Finalize com queijo parmesão e cheiro-verde.'},
+  {nome:'Mini Pizza Caseira', categoria:'paes', porcoes:9, link:'https://www.tiktok.com/@canal_nossa_cozinha/video/7664649074536189204?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'mini-pizza.jpg',
+   ingredientes:'3/4 xícara de água morna (180ml)\n5g de fermento biológico seco\n1 colher (chá) de açúcar (4g)\n1 colher (chá) de sal (8g)\n2 xícaras de farinha de trigo (320g)\n2 colheres (sopa) de azeite (30ml)\n200g de molho de tomate, 200g de queijo muçarela, 1 linguiça calabresa fatiada, orégano e azeitonas para cobertura (rende ~9 mini pizzas de 12cm)',
+   modo:'Misture água morna, fermento, açúcar, sal e azeite. Junte a farinha e sove por 10 min até ficar lisa e elástica. Deixe descansar coberta por 1h até dobrar de volume. Abra a massa (3-4mm), corte discos de 12cm e fure com garfo. Pré-asse a 250°C por 10 min. Cubra com molho, queijo, calabresa, azeitona e orégano. Volte ao forno a 250°C por 15-20 min até gratinar (ou 7-8 min na air fryer).'},
+  {nome:'Fricassê de Carne', categoria:'carne', porcoes:6, link:'https://www.tiktok.com/@jobsonamancio/video/7662130827513449746?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'fricasse-carne.jpg',
+   ingredientes:'2 latinhas de milho (sem a água)\n200g de requeijão cremoso\n2 caixinhas de creme de leite\n500g de carne em tiras (alcatra, contrafilé ou filé-mignon)\n2 colheres (sopa) de azeite\n1/2 cebola picada\n2 dentes de alho picados\n2 colheres (sopa) de extrato de tomate\nSal, pimenta-do-reino e páprica picante a gosto\n2 colheres (sopa) de cheiro-verde\n200g de muçarela ralada\nBatata palha a gosto',
+   modo:'Bata o milho (sem água) com requeijão e creme de leite até formar um creme liso. Refogue cebola e alho no azeite, doure as tiras de carne, tempere com extrato de tomate, sal, pimenta e páprica. Em um refratário, coloque a carne e cubra com o creme de milho. Cubra com muçarela e leve ao forno para gratinar. Finalize com batata palha antes de servir.'},
+  {nome:'Arroz de Fraldinha', categoria:'carne', porcoes:6, link:'https://www.tiktok.com/@thigas/video/7664335255918202119?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'arroz-fraldinha.jpg',
+   ingredientes:'200g de bacon\n1 kg de fraldinha em pedaços\n2 cebolas picadas\n5 dentes de alho picados\n1 pimentão verde picado\n1/2 xícara de molho inglês\n1 colher (sopa) de páprica defumada\nSal e pimenta-do-reino a gosto\n3 tomates picados\n3 folhas de louro\n1 litro de água\n1 e 1/2 xícara de arroz\n200g de queijo parmesão\n2 colheres (sopa) de cheiro-verde',
+   modo:'Refogue o bacon, junte a fraldinha em pedaços e doure bem com cebola, alho e pimentão. Tempere com páprica, sal e pimenta. Adicione tomates, louro e água suficiente, cozinhando até a carne ficar macia. Junte o arroz e cozinhe até secar. Finalize com queijo parmesão e cheiro-verde.'},
+  {nome:'Arroz Cremoso de Sobrecoxa', categoria:'frango', porcoes:4, link:'https://www.tiktok.com/@chefeandrezao/video/7662908682685975815?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'arroz-sobrecoxa.jpg',
+   ingredientes:'4 sobrecoxas de frango\n2 xícaras de arroz\n600g de molho ou passata de tomate\n2 colheres (sopa) de manteiga\n3 dentes de alho picados\n1 cebola picada\n1 colher (sopa) de molho inglês\nSal e pimenta-do-reino a gosto\n1 litro de caldo de frango',
+   modo:'Refogue alho e cebola na manteiga, doure a sobrecoxa. Adicione o arroz e refogue rapidamente. Junte o molho de tomate, o caldo e o molho inglês, cozinhando em fogo baixo até o arroz e a carne ficarem macios e cremosos. Pode acrescentar cenoura, milho ou ervilha a gosto.'},
+  {nome:'Tilápia ao Molho de Camarão com Purê de Banana da Terra', categoria:'peixe', porcoes:3, link:'https://www.tiktok.com/@ocasaldebh/video/7615965316081929490?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'tilapia-camarao-banana.jpg',
+   ingredientes:'3 filés de tilápia\nSal, pimenta-do-reino e azeite a gosto (peixe)\n300g de camarão pré-cozido\n1/2 cebola picada\n2 dentes de alho picados\n1 tomate sem sementes picado\n200ml de creme de leite fresco\n2 colheres (sopa) de cream cheese\nAzeite, sal e pimenta-do-reino a gosto (molho)\n3 bananas da terra\n100ml de creme de leite fresco\n1 colher (sopa) de manteiga\nSal a gosto (purê)',
+   modo:'Tempere e grelhe os filés de tilápia no azeite até dourar dos dois lados. Para o molho, refogue cebola e alho, junte o tomate e o camarão, adicione o creme de leite fresco e o cream cheese até engrossar. Para o purê, cozinhe as bananas da terra, amasse com creme de leite, manteiga e sal até ficar cremoso. Monte o prato com o purê na base, o peixe por cima e regue com o molho de camarão.'},
+  {nome:'Salmão Recheado com Camarão', categoria:'peixe', porcoes:4, link:'https://www.tiktok.com/@lookdofogao/video/7667339708871068949?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'salmao-recheado-camarao.jpg',
+   ingredientes:'2 filés de salmão\n500g de camarão\n1 colher (sopa) de manteiga\n1 cebola picada\n1 alho-poró fatiado\n200g de palmito picado\n200g de requeijão\n7 colheres (sopa) de molho shoyu\nSal e pimenta-do-reino a gosto\n1 fio de azeite\n2 colheres (sopa) de salsinha para finalizar',
+   modo:'Refogue o camarão com manteiga, cebola e alho-poró. Junte o palmito picado e o requeijão até formar um recheio cremoso, temperando com shoyu, sal e pimenta. Abra os filés de salmão, recheie com essa mistura e leve ao forno até o salmão assar. Finalize com salsinha.'},
+  {nome:'Salmão Assado Prático', categoria:'peixe', porcoes:2, link:'https://www.tiktok.com/@jujuguerraa/video/7466551569568255238?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'salmao-assado.jpg',
+   ingredientes:'1 filé de salmão com pele\n50g de manteiga\n1 limão siciliano fatiado\nSal e pimenta a gosto\n10 tomatinhos\nManjericão para decorar\n1 fio de azeite',
+   modo:'Tempere o salmão com sal e pimenta, coloque em uma travessa com fatias de limão siciliano, manteiga e tomatinhos. Regue com azeite e leve ao forno pré-aquecido a 220°C até assar por completo. Finalize com manjericão fresco.'},
+  {nome:'Bolo Mesclado para o Café da Tarde', categoria:'bolos', porcoes:10, link:'https://www.tiktok.com/@vicsantos.emp/video/7637239634937810196?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'bolo-mesclado.jpg',
+   ingredientes:'3 ovos\n1 xícara de açúcar\n1/2 xícara de óleo\n1 colher (chá) de baunilha\n1 xícara de leite\n2 e 1/4 xícara de farinha de trigo\n1 colher (sopa) de fermento químico\n3 colheres (sopa) de chocolate em pó',
+   modo:'Misture os ovos, açúcar, óleo, baunilha e leite. Junte a farinha e o fermento. Separe uma parte da massa e misture com o chocolate em pó. Intercale as duas massas na forma untada, faça um leve mesclado com um garfo e leve ao forno até assar por completo.'},
+
+  // ---- Novos links adicionados posteriormente ----
+  {nome:'Pão de Alho com Camarão', categoria:'paes', porcoes:6, link:'https://www.tiktok.com/@euprefirodoce_/video/7674284206997933332?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'pao-alho-camarao.jpg',
+   ingredientes:'1 baguete ou pão francês longo\n4 colheres (sopa) de requeijão cremoso\n4 colheres (sopa) de maionese\n2 colheres (sopa) de manteiga\n1 colher (chá) de alho picado\nSal a gosto\n2 colheres (sopa) de coentro picado\n200g de queijo muçarela ralado\n300g de camarão limpo e temperado',
+   modo:'Misture o requeijão, a maionese, a manteiga, o alho, o sal e o coentro até formar uma pastinha cremosa. Corte a baguete ao meio no sentido do comprimento e espalhe a pastinha generosamente. Cubra com o queijo muçarela e distribua os camarões temperados por cima. Leve ao forno preaquecido a 200°C por 12-15 minutos, até o queijo derreter e dourar.'},
+  {nome:'Lanche de Pão Amanhecido na Air Fryer', categoria:'paes', porcoes:2, link:'https://www.tiktok.com/@chefeandrezao/video/7674663587155119378?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'pao-amanhecido-airfryer.jpg',
+   ingredientes:'2 fatias de pão amanhecido (ou pão francês)\n2 ovos cozidos picados\n100g de presunto picado\n100g de queijo picado\n3 colheres (sopa) de requeijão light\n1 colher (chá) de orégano\n1 tomate picado (opcional)\n50g de queijo gorgonzola\nAlho e óleo crocante a gosto\nGeleia de pimenta a gosto',
+   modo:'Misture os ovos picados, o presunto, o queijo, o requeijão e o orégano. Espalhe sobre as fatias de pão, adicione tomate se desejar e finalize com pedaços de gorgonzola por cima. Leve à air fryer a 180°C por 8-10 minutos, até gratinar e formar uma crostinha dourada. Finalize com alho e óleo crocante e geleia de pimenta.'},
+  {nome:'Limonada Alemã de Manga', categoria:'sobremesa', porcoes:4, link:'https://www.tiktok.com/@thigas/video/7607169570704477451?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'limonada-alema-manga.jpg',
+   ingredientes:'2 limões (com casca, sem sementes)\n1 manga madura, descascada e picada\n1 lata de leite condensado\n1 litro de água gelada\nAçúcar a gosto (opcional)\nGelo a gosto',
+   modo:'Corte os limões ao meio e retire as sementes, sem descascar. Bata os limões inteiros com a manga, o leite condensado e a água no liquidificador em velocidade alta por cerca de 30 segundos — não bata demais para não amargar. Coe, ajuste o açúcar se necessário e sirva bem gelada com gelo.'},
+  {nome:'Waffle Americano', categoria:'paes', porcoes:4, link:'https://www.tiktok.com/@cooknenjoy/video/7150384869472750853?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'waffle-americano.jpg',
+   ingredientes:'2 xícaras (chá) de farinha de trigo\n2 colheres (sopa) de açúcar\n1 colher (sopa) de fermento em pó\n1 pitada de sal\n2 ovos\n1 e 3/4 xícara (chá) de leite\n1/3 xícara (chá) de manteiga derretida\n1 colher (chá) de essência de baunilha\nBanana e chocolate para servir',
+   modo:'Misture os ingredientes secos em uma tigela. Em outra, bata os ovos, o leite, a manteiga derretida e a baunilha. Junte as duas misturas mexendo até incorporar, sem bater demais. Despeje porções da massa na máquina de waffle preaquecida e cozinhe por 4-5 minutos, até dourar. Sirva com banana fatiada e calda de chocolate.'},
+  {nome:'Arroz Pega Marido', categoria:'carne', porcoes:6, link:'https://www.tiktok.com/@helenapaula.receitas/video/7599400702053485842?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'arroz-pega-marido.jpg',
+   ingredientes:'2 linguiças calabresas em rodelas\n1 cenoura grande picada\n1 cebola picada\n2 colheres (sopa) de óleo\n4 dentes de alho picados\n1 tomate picado\n1 xícara de milho e ervilha\n2 xícaras (chá) de arroz\nSal a gosto\nPáprica a gosto\nCebolinha a gosto',
+   modo:'Refogue a calabresa no óleo até dourar. Junte a cebola, o alho e a cenoura, refogando bem. Adicione o tomate, o milho e a ervilha. Junte o arroz e refogue por 2 minutos. Cubra com água quente (o dobro do volume de arroz), tempere com sal e páprica, e cozinhe em fogo baixo até secar. Finalize com cebolinha.'},
+  {nome:'Costelinha de Porco na Pressão', categoria:'carne', porcoes:4, link:'https://www.tiktok.com/@camilamasullo/video/7646954790085397780?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'costelinha-porco-pressao.jpg',
+   ingredientes:'1 peça de costelinha de porco\nSuco de 1 laranja\n3 colheres (sopa) de azeite\n2 cebolas em rodelas\n3 dentes de alho picados\nSal a gosto\nAlecrim a gosto\nPimenta calabresa a gosto\n1 lata de cerveja preta\nSalsinha para finalizar',
+   modo:'Coloque a costelinha em um recipiente com o suco de laranja e leve à geladeira para marinar por 1 hora. Aqueça a panela de pressão com azeite e refogue a cebola e o alho. Adicione a costelinha com o suco de laranja, tempere com sal, alecrim e pimenta calabresa. Acrescente a cerveja preta, feche a panela e cozinhe por 30 minutos em fogo baixo após pegar pressão. Finalize com salsinha.'},
+  {nome:'Cuscuz de Chocolate Moreninho', categoria:'sobremesa', porcoes:6, link:'https://www.tiktok.com/@chefrogerioholanda/video/7671723695756594452?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'cuscuz-chocolate-moreninho.jpg',
+   ingredientes:'2 xícaras (chá) de flocão de milho (cuscuz)\n1 xícara (chá) de água\n1 lata de leite condensado\n4 colheres (sopa) de chocolate em pó\n2 colheres (sopa) de manteiga\n1 pitada de sal',
+   modo:'Hidrate o flocão com a água e uma pitada de sal, deixando descansar por 5 minutos. Leve ao fogo o leite condensado, o chocolate em pó e a manteiga, mexendo até formar um creme homogêneo. Misture o flocão hidratado a esse creme até incorporar bem. Transfira para uma forma untada (de preferência com furo central) e leve à geladeira por pelo menos 2 horas antes de desenformar.'},
+  {nome:'Sushi na Travessa (Jantar para Dois)', categoria:'peixe', porcoes:2, link:'https://www.tiktok.com/@raphaelcamposo/video/7674392504028040468?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'sushi-travessa.jpg',
+   ingredientes:'2 xícaras (chá) de arroz japonês\n2 e 1/2 xícaras (chá) de água\n60ml de vinagre de arroz\n2 colheres (sopa) de açúcar\n1 colher (chá) de sal\n400g de salmão em cubos\n200g de cream cheese\nTarê a gosto\nGergelim a gosto\nCebolinha a gosto\nAlga nori a gosto',
+   modo:'Cozinhe o arroz japonês com a água até ficar macio. Tempere ainda quente com o vinagre de arroz, o açúcar e o sal, misturando delicadamente. Espalhe o arroz temperado em uma travessa, formando uma camada uniforme. Cubra com o cream cheese, o salmão em cubos e regue com o tarê. Finalize com gergelim, cebolinha picada e tiras de alga nori. Sirva gelado, como um sushi de colher.'},
+  {nome:'Sorvete de Ninho com Chocolate', categoria:'sobremesa', porcoes:8, link:'https://www.tiktok.com/@saborperfeito.ofc/video/7667247595852500232?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'sorvete-ninho-chocolate.jpg',
+   ingredientes:'1 lata de leite condensado\n1 caixinha (200g) de creme de leite\n1 xícara (chá) de leite em pó (Ninho)\n200g de chocolate meio amargo derretido\n2 claras em neve (opcional)',
+   modo:'Bata o leite condensado, o creme de leite e o leite em pó até formar um creme homogêneo. Reserve metade e misture a outra metade com o chocolate derretido. Em uma forma (de preferência com fundo removível), alterne camadas do creme branco e do creme de chocolate. Leve ao congelador por pelo menos 6 horas antes de desenformar e servir.'},
+  {nome:'Chocotorta Argentina', categoria:'sobremesa', porcoes:8, link:'https://www.tiktok.com/@saborperfeito.ofc/video/7671092895268539656?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'brownie-doce-leite-airfryer.jpg',
+   ingredientes:'400g de biscoito maria ou chocolate\n400g de doce de leite\n300g de queijo cremoso (tipo cream cheese)\n1 xícara (chá) de café frio (para umedecer os biscoitos)\nChocolate em pó ou raspas de chocolate para polvilhar',
+   modo:'Bata o doce de leite com o queijo cremoso até obter um creme liso e homogêneo. Molhe rapidamente os biscoitos no café frio, sem deixar encharcar. Em um refratário, monte camadas alternando os biscoitos molhados com o creme de doce de leite, repetindo até terminar os ingredientes e finalizando com o creme por cima. Leve à geladeira por pelo menos 4 horas (idealmente de um dia para o outro). Antes de servir, polvilhe chocolate em pó ou raspas de chocolate.'},
+  {nome:'Arroz Biro-Biro do Chef Andrezão', categoria:'carne', porcoes:4, link:'https://www.tiktok.com/@chefeandrezao/video/7674363470539689234?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'arroz-biro-biro.jpg',
+   ingredientes:'4 ovos\n200g de bacon em cubos\n4 punhados de arroz cozido\n2 colheres (sopa) de salsinha\nBatata palha a gosto\nSal a gosto',
+   modo:'Frite o bacon até ficar bem crocante e dourado. Na mesma panela, frite os ovos mexendo rapidamente para formar pedaços (tipo ovos mexidos grosseiros). Misture o arroz já cozido, o bacon e os ovos, temperando com sal. Finalize com salsinha picada e bastante batata palha por cima antes de servir.'},
+  {nome:'Batata Cremosa com Frango e Bacon', categoria:'frango', porcoes:6, link:'https://www.tiktok.com/@freitassgabriell/video/7657295991024012564?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'batata-cremosa-frango-bacon.jpg',
+   ingredientes:'500g de peito de frango em cubos\n1 colher (chá) de páprica defumada\n1 colher (chá) de tempero pronto a gosto\nSal a gosto\nAzeite a gosto\n3 dentes de alho picados\n1/2 cebola picada\n2 colheres (sopa) de cheiro-verde\n150g de bacon em cubos\n700g de batata inglesa em cubos\n2 colheres (sopa) de manteiga\n3 colheres (sopa) de farinha de trigo\n600ml de leite\n1 caixinha de creme de leite\n50g de queijo parmesão\n150g de queijo muçarela',
+   modo:'Tempere o frango com páprica, tempero pronto, sal e um pouco de alho, e grelhe no azeite até dourar. Reserve. Frite o bacon até dourar. Cozinhe as batatas até ficarem macias. Para o molho, derreta a manteiga, refogue a cebola e o restante do alho, junte a farinha de trigo e mexa bem. Adicione o leite aos poucos, mexendo sempre até engrossar, e finalize com o creme de leite e o parmesão. Misture o frango, o bacon e as batatas ao molho cremoso, cubra com muçarela e leve ao forno para gratinar. Finalize com cheiro-verde.'},
+  {nome:'Filé de Frango Empanado com Queijo', categoria:'frango', porcoes:4, link:'https://www.tiktok.com/@chefeandrezao/video/7597181956266265863?is_from_webapp=1&sender_device=pc&web_id=7611152740450371090', imagem:IMG_BASE+'file-frango-queijo-arroz.jpg',
+   ingredientes:'4 filés de peito de frango\nSal e pimenta-do-reino a gosto\n2 ovos batidos\n1 xícara (chá) de farinha de rosca\n200g de queijo muçarela fatiado\nPáprica a gosto\nÓleo para fritar\nArroz branco para acompanhar',
+   modo:'Tempere os filés de frango com sal e pimenta. Passe cada filé no ovo batido e depois na farinha de rosca, pressionando bem. Frite em óleo quente até dourar dos dois lados e cozinhar por dentro. Cubra cada filé com uma fatia de queijo muçarela e leve à air fryer ou forno por 3-4 minutos, até derreter. Polvilhe páprica e sirva com arroz branco.'},
+  {nome:'Camarão na Moranga do Chef Taico', categoria:'peixe', porcoes:10, link:'https://www.youtube.com/watch?v=58QnfXUkQb4', imagem:yt('58QnfXUkQb4'),
+   ingredientes:'1 moranga de aproximadamente 3kg\n2kg de camarão médio limpo\n2 colheres (sopa) de manteiga\n500g de requeijão cremoso\n1 pimentão vermelho picado\n1 pimenta dedo de moça picada\n1 cebola grande picada\n2 colheres (sopa) de farinha de trigo\n1 xícara (chá) de cebolinha picada\n200ml de leite\n2 colheres (sopa) de vinagre misturadas em 200ml de água\nSal e pimenta a gosto',
+   modo:'Retire a tampa da moranga e as sementes, e cozinhe em água fervente com um pouco de sal e o vinagre até ficar ainda firme. Envolva a moranga com papel-alumínio e reserve em um refratário. Raspe um pouco da polpa cozida e reserve. Refogue na manteiga a cebola, a polpa da moranga, o pimentão e a pimenta até amolecer. Junte a farinha e misture bem. Adicione o leite e deixe ferver, junte o requeijão e deixe ferver novamente. Acrescente o camarão e aguarde o ponto. Desligue, adicione a cebolinha e recheie a moranga. Sirva imediatamente ou leve ao forno para aquecer, finalizando com um fio de azeite para dar brilho.'},
+  {nome:'Camarão na Moranga de Natal', categoria:'peixe', porcoes:8, link:'https://www.tiktok.com/@leitecamponesa/video/7312923730068442374?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'camarao-moranga-natal.jpg',
+   ingredientes:'1 abóbora-moranga\n400g de camarão\n1 pote de requeijão cremoso\n1 caixinha de creme de leite\n100g de queijo muçarela\n1 tomate grande picado\n1/2 pimentão amarelo\n1/2 pimentão vermelho\n1/2 cebola\n1 dente de alho\n3 colheres (sopa) de molho de tomate\nSal, pimenta-do-reino e páprica defumada a gosto\nCebolinha e coentro (ou salsinha) a gosto\nAzeite a gosto',
+   modo:'Abra a moranga e retire todas as sementes. Espalhe azeite por dentro e por fora e tempere o interior com sal, pimenta-do-reino e alho picado. Leve ao micro-ondas de 5 em 5 minutos até a polpa amolecer (geralmente 4 idas ao micro-ondas). Tempere os camarões com sal, pimenta-do-reino e páprica defumada, e sele na panela com azeite; reserve. Na mesma panela, refogue a cebola, o alho, o tomate e os pimentões. Adicione o molho de tomate e o creme de leite, e após levantar fervura junte o requeijão cremoso. Finalize com a polpa da moranga e cheiro-verde. Para montar, coloque metade do creme de camarão dentro da moranga, cubra com a muçarela e finalize com o restante do creme.'},
+  {nome:'Pão de Queijo com 3 Ingredientes', categoria:'paes', porcoes:8, link:'https://www.tiktok.com/@gbil_scorp/video/7516008447960288518?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'pao-queijo-3-ingredientes.jpg',
+   ingredientes:'200g de polvilho azedo\n200g de creme de leite\n120g de queijo muçarela ralado\n80g de queijo parmesão ralado',
+   modo:'Misture o polvilho azedo com o creme de leite até formar uma farofa úmida. Adicione os queijos ralados e misture bem até obter uma massa homogênea e levemente pegajosa. Com as mãos untadas, faça bolinhas e disponha em uma assadeira. Leve ao forno preaquecido a 180°C por cerca de 20-25 minutos, até dourarem por fora e ficarem macios por dentro.'},
+  {nome:'Pão de Queijo de Colher', categoria:'paes', porcoes:8, link:'https://www.tiktok.com/@saboresnoprato/video/7607239004597013781?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'pao-queijo-colher.jpg',
+   ingredientes:'500g de polvilho azedo\n2 colheres (chá) rasas de sal\n1/2 xícara (chá) de óleo (110ml)\n1/2 xícara (chá) de água (110ml)\n1 ovo\n1 e 1/2 xícara (chá) de água (320ml)\n200g de queijo muçarela',
+   modo:'Em uma tigela, misture o polvilho azedo com o sal. Ferva a primeira porção de água (110ml) com o óleo e escalde o polvilho, mexendo bem. Deixe amornar, adicione o ovo e misture. Acrescente aos poucos a segunda porção de água (320ml), mexendo até formar uma massa cremosa e homogênea (tipo uma massa de colher, sem sovar). Junte o queijo muçarela picado ou ralado e misture. Com o auxílio de uma colher, coloque porções da massa em forminhas ou em uma assadeira untada. Leve ao forno preaquecido a 200°C por cerca de 25-30 minutos, até dourarem por fora.'}
+];
+
+let recipes = [];
+let currentIngId = null;
+let lastCardapio = [];
+
+function loadRecipes(){
+  const saved = localStorage.getItem('receitas_cardapios_v12');
+  if(saved){ recipes = JSON.parse(saved); }
+  else { recipes = SEED_RECIPES.map((r,i)=>({...r, id: 'r'+i})); saveRecipes(); }
+}
+function saveRecipes(){ localStorage.setItem('receitas_cardapios_v12', JSON.stringify(recipes)); }
+
+let currentTab = 'todas';
+
+function buildTabs(){
+  const tabs = document.getElementById('tabs');
+  const all = [{key:'todas', label:'Todas', emoji:'🍽️'}].concat(Object.entries(CATS).map(([k,v])=>({key:k,label:v.label,emoji:v.emoji})));
+  tabs.innerHTML = all.map(t=>`<button class="tab ${t.key===currentTab?'active':''}" onclick="setTab('${t.key}')">${t.emoji} ${t.label}</button>`).join('');
+}
+function setTab(key){ currentTab = key; buildTabs(); render(); }
+
+function render(){
+  const grid = document.getElementById('grid');
+  const q = document.getElementById('search').value.toLowerCase().trim();
+  let list = recipes.filter(r => currentTab==='todas' || r.categoria===currentTab);
+  if(q) list = list.filter(r => r.nome.toLowerCase().includes(q));
+  if(list.length===0){ grid.innerHTML = '<div class="empty">Nenhuma receita encontrada. Clique em "+ Nova Receita" para adicionar.</div>'; return; }
+  grid.innerHTML = list.map(r=>{
+    const cat = CATS[r.categoria] || CATS.paes;
+    const thumbContent = r.imagem
+      ? `<img src="${r.imagem}" alt="${escapeHtml(r.nome)}" onerror="this.parentElement.innerHTML='${cat.emoji}'">`
+      : cat.emoji;
+    const porcoes = r.porcoes || 4;
+    return `<div class="card">
+      <div class="thumb" style="background:${cat.color}">${thumbContent}</div>
+      <div class="card-body">
+        <span class="badge" style="background:${cat.color}">${cat.label}</span>
+        <h3>${escapeHtml(r.nome)}</h3>
+        <div class="meta">Rende ${porcoes} ${porcoes===1?'porção':'porções'}</div>
+        ${r.pending ? '<div class="meta">⚠️ Assista ao vídeo e complete os ingredientes</div>' : ''}
+        <div class="card-actions">
+          <button class="ing" onclick="showIngredientes('${r.id}')">Ingredientes</button>
+          <a class="video" href="${r.link}" target="_blank" rel="noopener">▶ Ver vídeo</a>
+          <button class="icon-btn" onclick="shareRecipe('${r.id}')" title="Compartilhar">📤</button>
+          <button class="icon-btn" onclick="editRecipe('${r.id}')">✏️ Editar</button>
+          <button class="icon-btn" onclick="deleteRecipe('${r.id}')">🗑️</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+// ---- Ajuste de rendimento (escala proporcional dos ingredientes) ----
+function parseAmount(token){
+  token = token.trim();
+  let m;
+  if(m = token.match(/^(\d+)\s+e\s+(\d+)\/(\d+)$/i)) return parseInt(m[1]) + parseInt(m[2])/parseInt(m[3]);
+  if(m = token.match(/^(\d+)\/(\d+)$/)) return parseInt(m[1])/parseInt(m[2]);
+  if(m = token.match(/^(\d+)[.,](\d+)$/)) return parseFloat(m[1]+'.'+m[2]);
+  if(m = token.match(/^(\d+)$/)) return parseInt(m[1]);
+  return null;
+}
+function formatAmount(n){
+  n = Math.round(n*100)/100;
+  const whole = Math.floor(n);
+  const frac = +(n - whole).toFixed(2);
+  const fracMap = [[0.25,'1/4'],[0.33,'1/3'],[0.5,'1/2'],[0.67,'2/3'],[0.75,'3/4']];
+  for(const [val,label] of fracMap){
+    if(Math.abs(frac-val)<0.02){ return whole>0 ? `${whole} e ${label}` : label; }
+  }
+  if(Number.isInteger(n)) return String(n);
+  return n.toFixed(2).replace(/0$/,'').replace(/\.$/,'').replace('.', ',');
+}
+function scaleIngredientesText(text, ratio){
+  if(!text) return text;
+  if(Math.abs(ratio-1) < 0.001) return text;
+  return text.split('\n').map(line=>{
+    const m = line.match(/^(\d+\s+e\s+\d+\/\d+|\d+\/\d+|\d+[.,]\d+|\d+)/i);
+    if(!m) return line;
+    const amt = parseAmount(m[1]);
+    if(amt===null || isNaN(amt)) return line;
+    const scaled = amt*ratio;
+    const rest = line.slice(m[1].length);
+    return formatAmount(scaled) + rest;
+  }).join('\n');
+}
+
+function showIngredientes(id){
+  currentIngId = id;
+  const r = recipes.find(x=>x.id===id);
+  const base = r.porcoes || 4;
+  document.getElementById('ingTitle').textContent = 'Ingredientes — ' + r.nome;
+  document.getElementById('ingBasePortions').textContent = base + (base===1?' porção':' porções');
+  document.getElementById('ingPortionsInput').value = base;
+  document.getElementById('ingPortionsInput').dataset.base = base;
+  renderScaledIngredients();
+  document.getElementById('modoList').textContent = r.modo && r.modo.trim() ? r.modo : 'Ainda não preenchido.';
+  openModal('ingOverlay');
+}
+function changePortions(delta){
+  const input = document.getElementById('ingPortionsInput');
+  let v = parseInt(input.value)||1;
+  v = Math.max(1, v+delta);
+  input.value = v;
+  renderScaledIngredients();
+}
+function renderScaledIngredients(){
+  const r = recipes.find(x=>x.id===currentIngId);
+  if(!r) return;
+  const base = r.porcoes || 4;
+  const input = document.getElementById('ingPortionsInput');
+  let desired = parseInt(input.value);
+  if(!desired || desired<1){ desired = 1; input.value = 1; }
+  const ratio = desired/base;
+  const text = r.ingredientes && r.ingredientes.trim()
+    ? scaleIngredientesText(r.ingredientes, ratio)
+    : 'Ainda não preenchido. Assista ao vídeo e clique em "Editar" no card para adicionar os ingredientes.';
+  document.getElementById('ingList').textContent = text;
+}
+
+// ---- Compartilhar ----
+function shareText(title, text){
+  if(navigator.share){
+    navigator.share({title, text}).catch(()=>{});
+  } else if(navigator.clipboard){
+    navigator.clipboard.writeText(text).then(()=>{
+      window.open('https://wa.me/?text='+encodeURIComponent(text), '_blank');
+    }).catch(()=>{
+      window.open('https://wa.me/?text='+encodeURIComponent(text), '_blank');
+    });
+  } else {
+    window.open('https://wa.me/?text='+encodeURIComponent(text), '_blank');
+  }
+}
+function shareRecipe(id){
+  const r = recipes.find(x=>x.id===id);
+  if(!r) return;
+  const porcoes = r.porcoes || 4;
+  const text = `🍽️ ${r.nome}\n\nRendimento: ${porcoes} ${porcoes===1?'porção':'porções'}\n\nIngredientes:\n${r.ingredientes||'—'}\n\nModo de preparo:\n${r.modo||'—'}\n\nVídeo: ${r.link||''}`;
+  shareText(r.nome, text);
+}
+function shareCardapio(){
+  if(!lastCardapio.length){ return; }
+  let text = '📅 Cardápio da Semana\n\n';
+  lastCardapio.forEach(item=>{
+    text += item.nome ? `${item.dia}: ${item.nome}${item.link ? ' — '+item.link : ''}\n` : `${item.dia}: —\n`;
+  });
+  shareText('Cardápio da Semana', text);
+}
+
+function openForm(){
+  document.getElementById('formTitle').textContent = 'Nova Receita';
+  document.getElementById('editId').value = '';
+  document.getElementById('fNome').value = '';
+  document.getElementById('fCategoria').value = 'carne';
+  document.getElementById('fPorcoes').value = 4;
+  document.getElementById('fLink').value = '';
+  document.getElementById('fIngredientes').value = '';
+  document.getElementById('fModo').value = '';
+  openModal('formOverlay');
+}
+function editRecipe(id){
+  const r = recipes.find(x=>x.id===id);
+  document.getElementById('formTitle').textContent = 'Editar Receita';
+  document.getElementById('editId').value = r.id;
+  document.getElementById('fNome').value = r.nome;
+  document.getElementById('fCategoria').value = r.categoria;
+  document.getElementById('fPorcoes').value = r.porcoes || 4;
+  document.getElementById('fLink').value = r.link || '';
+  document.getElementById('fIngredientes').value = r.ingredientes || '';
+  document.getElementById('fModo').value = r.modo || '';
+  openModal('formOverlay');
+}
+function saveRecipe(){
+  const id = document.getElementById('editId').value;
+  const nome = document.getElementById('fNome').value.trim();
+  if(!nome){ alert('Digite o nome da receita.'); return; }
+  const porcoes = parseInt(document.getElementById('fPorcoes').value) || 4;
+  const data = {
+    nome,
+    categoria: document.getElementById('fCategoria').value,
+    porcoes: Math.max(1, porcoes),
+    link: document.getElementById('fLink').value.trim(),
+    ingredientes: document.getElementById('fIngredientes').value.trim(),
+    modo: document.getElementById('fModo').value.trim(),
+    pending: false
+  };
+  if(id){
+    const idx = recipes.findIndex(x=>x.id===id);
+    recipes[idx] = {...recipes[idx], ...data};
+  } else {
+    recipes.push({...data, id:'r'+Date.now()});
+  }
+  saveRecipes();
+  closeModal('formOverlay');
+  render();
+}
+function deleteRecipe(id){
+  if(!confirm('Remover esta receita?')) return;
+  recipes = recipes.filter(x=>x.id!==id);
+  saveRecipes();
+  render();
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function openCardapio(){
+  const dias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
+  const pool = recipes.filter(r => !CATEGORIAS_FORA_DO_CARDAPIO.includes(r.categoria));
+  for(let i=pool.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [pool[i],pool[j]]=[pool[j],pool[i]]; }
+  const chosen = [];
+  for(let i=0;i<dias.length;i++){
+    if(pool.length===0) break;
+    chosen.push(pool[i % pool.length]);
+  }
+  lastCardapio = dias.map((d,i)=>{
+    const r = chosen[i];
+    return {dia:d, nome:r?r.nome:null, link:r?r.link:null};
+  });
+  const rows = dias.map((d,i)=>{
+    const r = chosen[i];
+    if(!r) return `<tr><td>${d}</td><td colspan="2">—</td></tr>`;
+    const cat = CATS[r.categoria] || CATS.paes;
+    return `<tr><td>${d}</td><td>${cat.emoji} ${escapeHtml(r.nome)}</td><td><a href="${r.link}" target="_blank">▶ vídeo</a></td></tr>`;
+  }).join('');
+  document.getElementById('cardapioTable').innerHTML = `<tr><th>Dia</th><th>Receita</th><th></th></tr>${rows}`;
+  openModal('cardapioOverlay');
+}
+
+document.getElementById('search').addEventListener('input', render);
+
+loadRecipes();
+buildTabs();
+render();
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
