@@ -428,7 +428,10 @@ const SEED_RECIPES = [
    modo:'Peneire e misture o leite em pó, o Ovomaltine, o café solúvel, o Nescau, o chantilly em pó, o bicarbonato e a canela. Acrescente o chocolate ralado e misture bem. Armazene em um recipiente bem fechado — deixe a mistura descansar por 1 a 2 dias antes de consumir para os sabores se integrarem. Para preparar: adicione 3 a 4 colheres (sopa) da mistura em uma caneca, acrescente 180 a 200ml de leite quente ou água quente, misture bem e aproveite!'},
   {nome:'Danette Caseiro', categoria:'sobremesa', porcoes:6, link:'https://youtu.be/atKj8KYFw_c?si=veRMkSG_HrB5SmQL', imagem:yt('atKj8KYFw_c'),
    ingredientes:'1 litro de leite\n1 lata de leite condensado\n1 gema\n8 colheres (sopa) de chocolate em pó (100g)\n4 colheres (sopa) de amido de milho (50g)\n1 caixinha de creme de leite',
-   modo:'Em uma panela, misture o leite, o leite condensado, a gema, o chocolate em pó e o amido de milho. Leve ao fogo médio mexendo sempre até engrossar e formar um creme liso. Fora do fogo, incorpore o creme de leite. Distribua em potinhos e leve à geladeira até firmar e gelar bem antes de servir.'}
+   modo:'Em uma panela, misture o leite, o leite condensado, a gema, o chocolate em pó e o amido de milho. Leve ao fogo médio mexendo sempre até engrossar e formar um creme liso. Fora do fogo, incorpore o creme de leite. Distribua em potinhos e leve à geladeira até firmar e gelar bem antes de servir.'},
+  {nome:'Coalhada Caseira Completa', categoria:'sobremesa', porcoes:8, link:'https://youtu.be/GU5_SoTgDrI', imagem:yt('GU5_SoTgDrI'),
+   ingredientes:'1 litro de leite (em saquinhos, Leite Longa Vida)\n1 pote de iogurte natural\n40g de açúcar demerara ou açúcar comum por litro de leite\n20g de leite em pó',
+   modo:'Coloque o leite na panela junto com o açúcar e aqueça até formar bolhas ao redor da panela. Desligue o fogo e aguarde o leite ficar morno. Acrescente o leite em pó e o iogurte natural, misturando bem. Distribua o leite nos potes ou frascos na porção desejada — a fermentação ocorrerá no próprio potinho, transformando o leite em uma coalhada firme e compacta. Coloque os potinhos em uma caixa de isopor por 24 horas (período de fermentação) até a coalhada estar pronta para ser consumida.'}
 ];
 
 let recipes = [];
@@ -436,11 +439,11 @@ let currentIngId = null;
 let lastCardapio = [];
 
 function loadRecipes(){
-  const saved = localStorage.getItem('receitas_cardapios_v15');
+  const saved = localStorage.getItem('receitas_cardapios_v16');
   if(saved){ recipes = JSON.parse(saved); }
   else { recipes = SEED_RECIPES.map((r,i)=>({...r, id: 'r'+i})); saveRecipes(); }
 }
-function saveRecipes(){ localStorage.setItem('receitas_cardapios_v15', JSON.stringify(recipes)); }
+function saveRecipes(){ localStorage.setItem('receitas_cardapios_v16', JSON.stringify(recipes)); }
 
 let currentTab = 'todas';
 
