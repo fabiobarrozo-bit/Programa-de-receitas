@@ -214,7 +214,7 @@ const SEED_RECIPES = [
   {nome:'Batatas Assadas Crocantes', categoria:'paes', porcoes:4, link:'https://youtu.be/rwyEPcWUR60', imagem:yt('rwyEPcWUR60'),
    ingredientes:'1 kg de batatas médias, descascadas e cortadas em pedaços\n3 colheres (sopa) de azeite\n3 dentes de alho picados\n1 colher (chá) de sal\nPimenta-do-reino a gosto\n1 colher (chá) de orégano',
    modo:'Pré-cozinhe as batatas em água fervente com sal por 8-10 minutos, até ficarem macias por fora mas firmes por dentro. Escorra bem e sacuda na peneira para criar ranhuras na superfície (isso deixa mais crocante). Tempere com azeite, alho, sal, pimenta e orégano. Espalhe em uma assadeira sem sobrepor e leve ao forno preaquecido a 220°C por 35-40 minutos, virando na metade do tempo, até dourar e ficar crocante.'},
-  {nome:'Molho de Tomate Caseiro Fácil e Rápido', categoria:'paes', porcoes:6, link:'https://youtu.be/FqgC9--qNFU', imagem:yt('FqgC9--qNFU'),
+  {nome:'Molho de Tomate Caseiro Fácil e Rápido', categoria:'molhos', porcoes:6, link:'https://youtu.be/FqgC9--qNFU', imagem:yt('FqgC9--qNFU'),
    ingredientes:'1 kg de tomates maduros, sem pele e picados\n1 cebola picada\n3 dentes de alho picados\n3 colheres (sopa) de azeite\n1 colher (chá) de açúcar\nSal a gosto\nFolhas de manjericão a gosto',
    modo:'Refogue a cebola e o alho no azeite até dourarem levemente. Adicione os tomates picados, o açúcar e o sal. Cozinhe em fogo médio-baixo por 25-30 minutos, mexendo de vez em quando, até o molho encorpar. Se preferir mais liso, bata no liquidificador antes de voltar ao fogo por mais 5 minutos. Finalize com manjericão fresco.'},
   {nome:'Picolé Caseiro tipo Magnum', categoria:'sobremesa', porcoes:8, link:'https://youtu.be/Bfbsu2tRPrY', imagem:yt('Bfbsu2tRPrY'),
@@ -483,11 +483,11 @@ let currentIngId = null;
 let lastCardapio = [];
 
 function loadRecipes(){
-  const saved = localStorage.getItem('receitas_cardapios_v18');
+  const saved = localStorage.getItem('receitas_cardapios_v19');
   if(saved){ recipes = JSON.parse(saved); }
   else { recipes = SEED_RECIPES.map((r,i)=>({...r, id: 'r'+i})); saveRecipes(); }
 }
-function saveRecipes(){ localStorage.setItem('receitas_cardapios_v18', JSON.stringify(recipes)); }
+function saveRecipes(){ localStorage.setItem('receitas_cardapios_v19', JSON.stringify(recipes)); }
 
 let currentTab = 'todas';
 
