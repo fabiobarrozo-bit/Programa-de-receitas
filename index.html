@@ -15,7 +15,7 @@
 <style>
   :root{
     --bg:#fff8f0; --card:#ffffff; --primary:#e8622c; --primary-dark:#c94f1f;
-    --frango:#f4a836; --carne:#c1443a; --peixe:#3a8fc1; --bolos:#a878c9; --sobremesa:#d9538e; --paes:#b07a3e;
+    --frango:#f4a836; --carne:#c1443a; --peixe:#3a8fc1; --bolos:#a878c9; --sobremesa:#d9538e; --paes:#b07a3e; --molhos:#7a9a2e;
     --text:#3a2c1f; --muted:#8a7a6a; --border:#eee0d0;
   }
   *{box-sizing:border-box;}
@@ -124,6 +124,7 @@
       <option value="bolos">Bolos</option>
       <option value="sobremesa">Sobremesas</option>
       <option value="paes">Pães e Lanches</option>
+      <option value="molhos">Molhos</option>
     </select>
     <label>Rendimento (porções)</label>
     <input type="number" id="fPorcoes" min="1" value="4">
@@ -185,10 +186,11 @@ const CATS = {
   peixe:{label:'Peixe', color:'var(--peixe)', emoji:'🐟'},
   bolos:{label:'Bolos', color:'var(--bolos)', emoji:'🎂'},
   sobremesa:{label:'Sobremesas', color:'var(--sobremesa)', emoji:'🍮'},
-  paes:{label:'Pães e Lanches', color:'var(--paes)', emoji:'🥐'}
+  paes:{label:'Pães e Lanches', color:'var(--paes)', emoji:'🥐'},
+  molhos:{label:'Molhos', color:'var(--molhos)', emoji:'🫙'}
 };
 // Categorias fora do cardápio semanal (não são pratos principais de almoço/jantar)
-const CATEGORIAS_FORA_DO_CARDAPIO = ['bolos','sobremesa','paes'];
+const CATEGORIAS_FORA_DO_CARDAPIO = ['bolos','sobremesa','paes','molhos'];
 
 // Receitas semeadas a partir dos links enviados.
 // Ingredientes, quantidades, rendimento (porções) e modo de preparo revisados.
@@ -236,7 +238,7 @@ const SEED_RECIPES = [
   {nome:'Pizza Domino\'s em Casa (Massa Pan)', categoria:'paes', porcoes:4, link:'https://youtu.be/sosvzu1A2z0', imagem:yt('sosvzu1A2z0'),
    ingredientes:'2 xícaras (chá) de farinha de trigo\n1 colher (sopa) de fermento biológico seco\n1 colher (sopa) de açúcar\n1 colher (chá) de sal\n3/4 xícara de água morna\n2 colheres (sopa) de azeite\n200g de molho de tomate, 200g de queijo muçarela e pepperoni a gosto (cobertura)',
    modo:'Misture a água morna com o fermento e o açúcar e deixe espumar por 5 minutos. Junte a farinha, o sal e o azeite, sovando até obter uma massa lisa e elástica. Deixe descansar coberta por 1 hora, até dobrar de volume. Abra a massa em uma forma untada, formando uma pizza mais alta nas bordas (estilo Pan). Cubra com molho de tomate, queijo e pepperoni. Asse a 220°C por 15-20 minutos, até a base dourar e o queijo derreter.'},
-  {nome:'Ragù de Linguiça (O Poderoso Chefão)', categoria:'carne', porcoes:6, link:'https://youtu.be/Hkh9eZSqgKo', imagem:yt('Hkh9eZSqgKo'),
+  {nome:'Ragù de Linguiça (O Poderoso Chefão)', categoria:'molhos', porcoes:6, link:'https://youtu.be/Hkh9eZSqgKo', imagem:yt('Hkh9eZSqgKo'),
    ingredientes:'500g de linguiça toscana, sem a pele e esfarelada\n1 cebola picada\n3 dentes de alho picados\n2 latas de tomate pelado picado\n1/2 xícara de vinho tinto\n2 colheres (sopa) de azeite\nSal, pimenta e manjericão a gosto\nMassa a gosto para acompanhar',
    modo:'Doure a linguiça esfarelada no azeite até soltar a gordura e ficar bem dourada. Retire e reserve. Na mesma panela, refogue a cebola e o alho, deglace com o vinho tinto e deixe evaporar o álcool. Volte a linguiça à panela, junte o tomate pelado e cozinhe em fogo baixo por 40-50 minutos, até o molho encorpar. Tempere com sal, pimenta e manjericão. Sirva sobre a massa cozida.'},
   {nome:'Rondelli de Queijo e Presunto', categoria:'carne', porcoes:6, link:'https://youtu.be/YX3U_SHFQQg', imagem:yt('YX3U_SHFQQg'),
@@ -431,7 +433,49 @@ const SEED_RECIPES = [
    modo:'Em uma panela, misture o leite, o leite condensado, a gema, o chocolate em pó e o amido de milho. Leve ao fogo médio mexendo sempre até engrossar e formar um creme liso. Fora do fogo, incorpore o creme de leite. Distribua em potinhos e leve à geladeira até firmar e gelar bem antes de servir.'},
   {nome:'Coalhada Caseira Completa', categoria:'sobremesa', porcoes:8, link:'https://youtu.be/GU5_SoTgDrI', imagem:yt('GU5_SoTgDrI'),
    ingredientes:'1 litro de leite (em saquinhos, Leite Longa Vida)\n1 pote de iogurte natural\n40g de açúcar demerara ou açúcar comum por litro de leite\n20g de leite em pó',
-   modo:'Coloque o leite na panela junto com o açúcar e aqueça até formar bolhas ao redor da panela. Desligue o fogo e aguarde o leite ficar morno. Acrescente o leite em pó e o iogurte natural, misturando bem. Distribua o leite nos potes ou frascos na porção desejada — a fermentação ocorrerá no próprio potinho, transformando o leite em uma coalhada firme e compacta. Coloque os potinhos em uma caixa de isopor por 24 horas (período de fermentação) até a coalhada estar pronta para ser consumida.'}
+   modo:'Coloque o leite na panela junto com o açúcar e aqueça até formar bolhas ao redor da panela. Desligue o fogo e aguarde o leite ficar morno. Acrescente o leite em pó e o iogurte natural, misturando bem. Distribua o leite nos potes ou frascos na porção desejada — a fermentação ocorrerá no próprio potinho, transformando o leite em uma coalhada firme e compacta. Coloque os potinhos em uma caixa de isopor por 24 horas (período de fermentação) até a coalhada estar pronta para ser consumida.'},
+  {nome:'Molho Branco Caseiro', categoria:'molhos', porcoes:4, link:'https://www.tiktok.com/@chefseujoao/video/7666483023973485844?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'molho-branco-caseiro.jpg',
+   ingredientes:'2 colheres (sopa) de manteiga\n2 colheres (sopa) de farinha de trigo\n500ml de leite quente\nSal e pimenta-do-reino a gosto\nNoz-moscada ralada (opcional)',
+   modo:'Derreta a manteiga em fogo médio numa panela. Acrescente a farinha e mexa bem por 1 a 2 minutos até formar um roux levemente dourado (isso evita o gosto de farinha crua). Aos poucos, adicione o leite quente, mexendo sempre com um batedor para evitar grumos. Cozinhe em fogo baixo até engrossar e ficar cremoso. Ajuste o sal e a pimenta e, se quiser, finalize com noz-moscada ralada.'},
+  {nome:'Almôndega ao Sugo e ao Molho Gorgonzola', categoria:'carne', porcoes:4, link:'https://www.tiktok.com/@chefseujoao/video/7682564525727730964?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'almondega-sugo-gorgonzola.jpg',
+   ingredientes:'Almôndegas: carne moída, ovo, farinha de rosca (ou pão umedecido), cebola picada, alho, sal, pimenta e salsa ou cheiro-verde\n\nMolho sugo: tomates maduros (ou molho de tomate), cebola, alho, azeite, sal, pimenta e manjericão ou orégano\n\nMolho gorgonzola: queijo gorgonzola, creme de leite, manteiga, alho (opcional), sal e pimenta\n\n(Quantidades não informadas na legenda — veja o vídeo)',
+   modo:'Modele bolinhas uniformes com a carne temperada e sele-as na frigideira. Sugo: refogue cebola e alho no azeite, junte os tomates e cozinhe até reduzir, temperando com sal, pimenta e ervas; cozinhe as almôndegas no molho. Gorgonzola: derreta a manteiga em fogo baixo, junte o creme de leite e o gorgonzola em pedaços, mexendo até incorporar, sem deixar ferver; coloque as almôndegas seladas no molho de queijo e aqueça delicadamente. Sirva com macarrão, polenta, purê ou arroz.'},
+  {nome:'Panqueca de Presunto e Queijo com Molho Branco e Vermelho', categoria:'carne', porcoes:6, link:'https://www.tiktok.com/@vanessacosta.receitas/video/7691718369724222728?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'panqueca-presunto-queijo.jpg',
+   ingredientes:'Massa (rende cerca de 6 panquecas):\n200ml de leite\n1 xícara (200ml) de farinha de trigo\n1 colher (sopa) de óleo\n1 colher (chá) de sal\n2 ovos\n\nRecheio (2 fatias de presunto e 2 de muçarela por panqueca):\n16 fatias de presunto\n16 fatias de muçarela\nRequeijão a gosto\n\nMolho branco:\n2 colheres (sopa) de manteiga\n2 colheres (sopa) de farinha de trigo\n500ml de leite\n2 colheres (sopa) de requeijão\n1 caixinha de creme de leite\nSal e noz-moscada a gosto\n\nMolho vermelho:\n2 tomates triturados\n150g de extrato de tomate\nCebola e alho a gosto\nSal, orégano e pimenta-do-reino a gosto\nAzeite\nUm pouquinho de água\n\nA autora fez 2 receitas da massa para 8 panquecas.',
+   modo:'Bata a massa no liquidificador (leite, farinha, óleo, sal e ovos) até ficar lisa e sem grumos. Em frigideira antiaderente levemente untada, faça os discos em fogo médio, virando quando as bordas soltarem. Em cada disco, coloque 2 fatias de presunto, 2 de muçarela e requeijão a gosto e enrole. Molho branco: derreta a manteiga, junte a farinha e mexa até formar um roux claro; acrescente o leite aos poucos até engrossar, depois o requeijão e o creme de leite, ajuste o sal e tempere com noz-moscada. Molho vermelho: refogue cebola e alho no azeite, junte os temperos, os tomates e o extrato, adicione só um pouquinho de água e deixe ferver até encorpar (cuidado para não ficar aguado). Cubra as panquecas com os molhos e gratine.'},
+  {nome:'Lanche de Pão Francês Recheado', categoria:'paes', porcoes:4, link:'https://www.tiktok.com/@explorerdronenews/video/7686262781900754184?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'lanche-pao-frances.jpg',
+   ingredientes:'150g de presunto picado\n150g de queijo muçarela picado\n2 tomates sem sementes picados\n1 punhado de salsinha bem picada\nSal e pimenta-do-reino a gosto\n200g de requeijão cremoso\nPão francês\nFatias de queijo para cobrir',
+   modo:'Misture muito bem o presunto, a muçarela, o tomate, a salsinha, o sal, a pimenta e o requeijão. Abra o pão francês como mostrado no vídeo e recheie bem. Cubra com uma fatia de queijo e leve à air fryer ou ao forno até dourar bem.'},
+  {nome:'Escondidinho de Camarão', categoria:'peixe', porcoes:6, link:'https://www.tiktok.com/@cozinhadojuba/video/7690609632934432021?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'escondidinho-camarao.jpg',
+   ingredientes:'800g de camarão\nSal e pimenta-do-reino\nÓleo\n1/2 cebola\n1/2 pimentão amarelo\n1/2 pimentão vermelho\n1 tomate pequeno\n800g de mandioca\n1 caixinha de creme de leite\nCheiro-verde a gosto\nMuçarela e batata palha a gosto',
+   modo:'Tempere o camarão com sal e pimenta e refogue no óleo com a cebola, os pimentões e o tomate; finalize com cheiro-verde para o recheio. Cozinhe a mandioca e amasse com o creme de leite até formar um purê. Em um refratário, monte o escondidinho com o recheio de camarão, cubra com o purê, a muçarela e leve ao forno para gratinar. Finalize com batata palha. (A legenda lista só os ingredientes; o preparo segue o que aparece no vídeo.)'},
+  {nome:'Bolo Mesclado com Ganache de Café', categoria:'bolos', porcoes:12, link:'https://www.tiktok.com/@euprefirodoce_/video/7692087486427778311?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'bolo-mesclado-cafe.jpg',
+   ingredientes:'Massa:\n200g de manteiga em ponto de pomada\n1 xícara de açúcar\n3 ovos\n2 xícaras de farinha de trigo\n1/3 de xícara de amido de milho\nPitada de sal\n200ml de leite\n1 colher (sopa) de fermento\n4 colheres (sopa) de chocolate em pó 50%\n1 colher (sopa) de essência de baunilha\n\nGanache:\n160g de chocolate meio amargo\n50ml de café',
+   modo:'Prepare a massa de baunilha com os ingredientes e separe uma parte para misturar o chocolate em pó, fazendo a massa mesclada em forma com furo. Asse em forno pré-aquecido a 180°C por cerca de 40 minutos. Ganache: leve o chocolate e o café ao micro-ondas de 30 em 30 segundos, mexendo, até ficar homogêneo. Cubra o bolo com a ganache.'},
+  {nome:'Macarronada Cremosa de Bacon com Calabresa', categoria:'carne', porcoes:6, link:'https://www.tiktok.com/@freitassgabriell/video/7690698237262548245?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'macarronada-bacon-calabresa.jpg',
+   ingredientes:'200g de bacon\n1 gomo de linguiça calabresa\n1/2 cebola picada\n2 dentes de alho\n2 tomates\nPáprica, tempero completo, sal e pimenta a gosto\n400g de macarrão\n1 sachê de molho de tomate\n3 colheres (sopa) de extrato de tomate\n200g de requeijão cremoso\nCheiro-verde a gosto\n150g de muçarela\nÁgua do cozimento (se precisar)',
+   modo:'Frite o bacon e a calabresa, refogue a cebola e o alho e junte os tomates e os temperos. Acrescente o molho de tomate e o extrato, cozinhe o macarrão na mesma panela (ou junte o macarrão cozido) e ajuste com a água do cozimento se precisar. Finalize com o requeijão, a muçarela e o cheiro-verde, mexendo até ficar cremoso. (A legenda lista só os ingredientes; o preparo segue o que aparece no vídeo.)'},
+  {nome:'Sushi de Camarão de Preguiçoso', categoria:'peixe', porcoes:6, link:'https://www.tiktok.com/@thigas/video/7691052058731924788?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'sushi-camarao-preguicoso.jpg',
+   ingredientes:'1 xícara de arroz japonês\n2 xícaras de água\n3 colheres (sopa) de vinagre\n2 colheres (sopa) de açúcar\n1 colher (chá) de sal\n400g de camarão\n350g (aprox.) de cream cheese\nAlga nori\nMolho tarê a gosto',
+   modo:'Cozinhe o arroz japonês com a água e tempere com o vinagre, o açúcar e o sal. Monte em camadas com o cream cheese, a alga nori e o camarão e finalize com o molho tarê, servindo em temaki ou fatiado. (A legenda lista só os ingredientes; a montagem segue o que aparece no vídeo.)'},
+  {nome:'Bolo de Pamonha sem Ovos e sem Forno', categoria:'bolos', porcoes:8, link:'https://www.tiktok.com/@edianecomidamineira/video/7685469888135105810?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'bolo-pamonha.jpg',
+   ingredientes:'4 latinhas de milho sem a água\n500ml de leite\n200g de açúcar\n1 colher (sopa) de manteiga\n1 caixinha de creme de leite\nCanela a gosto',
+   modo:'Bata no liquidificador o milho, o leite, o açúcar, a manteiga e o creme de leite. Leve a mistura ao fogo mexendo até engrossar, despeje em forma e deixe esfriar e firmar. Desenforme e polvilhe canela. (A legenda lista só os ingredientes; o preparo segue o que aparece no vídeo.)'},
+  {nome:'Bolo de Chocolate com Brigadeiro', categoria:'bolos', porcoes:15, link:'https://www.tiktok.com/@leticia_sweetcake/video/7686214154394324245?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'bolo-chocolate-brigadeiro.jpg',
+   ingredientes:'Massa:\n3 ovos\n1/2 xícara (chá) de óleo (120ml)\n1 xícara (chá) de açúcar (180g)\n1/2 xícara (chá) de chocolate em pó (55g)\n1 xícara (chá) de café coado quente (240ml)\n2 xícaras (chá) de farinha de trigo (280g)\n1 colher (sopa) de fermento em pó (15g)\n\nRecheio e cobertura:\n1 caixa de leite condensado (395g)\n2 colheres (sopa) de chocolate em pó 50% (30g)\n2 caixas de creme de leite (400g)\n100g de chocolate ao leite\n\nForma de 20x30cm ou 22x32cm',
+   modo:'Misture os ingredientes da massa até ficar homogênea e despeje na forma. Asse a 180°C por aproximadamente 40 a 45 minutos. Brigadeiro de recheio e cobertura: cozinhe o leite condensado com o chocolate em pó, o creme de leite e o chocolate ao leite até obter um creme; cubra o bolo com ele.'},
+  {nome:'Pão Caseiro Recheado sabor Pizza', categoria:'paes', porcoes:12, link:'https://www.tiktok.com/@vanessacosta.receitas/video/7686518863160233223?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'pao-caseiro-pizza.jpg',
+   ingredientes:'Rende 2 pães grandes\n550g a 600g de farinha de trigo\n150ml de água\n150ml de leite\n50g de açúcar\n70ml de óleo\n1 colher (chá) de sal\n1 ovo\n10g de fermento biológico\n\nRecheio sabor pizza:\n300g de muçarela\n300g de presunto\nOrégano a gosto',
+   modo:'Misture e sove os ingredientes da massa até ficar lisa e deixe crescer. Abra a massa, espalhe a muçarela, o presunto e o orégano, enrole e deixe crescer novamente. Asse até dourar e fatie. (A legenda diz apenas "modo de preparo no vídeo"; os tempos de descanso e forno seguem o vídeo.)'},
+  {nome:'Bolo Cremoso de Leite (5 minutos)', categoria:'bolos', porcoes:8, link:'https://www.tiktok.com/@receituandomaster/video/7673589085629336853?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'bolo-cremoso-leite.jpg',
+   ingredientes:'Leite\nOvos\nAçúcar\nFarinha de trigo\nFermento\nBaunilha, margarina ou óleo (opcional)\n\n(A legenda não informa as quantidades — veja o vídeo)',
+   modo:'Bata os líquidos (leite, ovos e óleo ou manteiga) com o açúcar até homogeneizar, acrescente a farinha misturando suavemente e, por último, o fermento. Leve ao forno pré-aquecido e asse até dourar o topo, mantendo o interior cremoso. Preparo ativo em menos de 5 minutos.'},
+  {nome:'Filé ao Molho de Queijo (Jantar para 10)', categoria:'carne', porcoes:10, link:'https://www.tiktok.com/@vanessacosta.receitas/video/7689557616019688711?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'file-molho-queijo.jpg',
+   ingredientes:'1,8kg de filé-mignon ou outra carne de primeira\nSal, páprica, lemon pepper, pimenta-do-reino e pimenta-calabresa a gosto\n2 colheres (sopa) de alho picado\n1 cebola\n100g de champignon\n150g de bacon\nMuçarela e cheiro-verde a gosto para finalizar\n\nMolho de queijo:\n2 colheres (sopa) de manteiga\n2 colheres (sopa) de farinha de trigo\n600 a 700ml de leite\n150g de parmesão\n80g de gorgonzola\n200g de muçarela em cubos\nNoz-moscada a gosto\nSal, se necessário',
+   modo:'Tempere a carne e sele com o alho, a cebola, o champignon e o bacon. Molho de queijo: derreta a manteiga, junte a farinha, acrescente o leite aos poucos até engrossar e derreta o parmesão, o gorgonzola e a muçarela, temperando com noz-moscada. Cubra a carne com o molho, finalize com muçarela e cheiro-verde e leve para gratinar. O molho engrossa ao esfriar: para manter a cremosidade, vá acrescentando leite aos poucos. Sirva com arroz branco e batata palha.'},
+  {nome:'Fettuccine com Filé Mignon ao Molho Cremoso', categoria:'carne', porcoes:3, link:'https://www.tiktok.com/@ocasaldebh/video/7688733781297089800?is_from_webapp=1&sender_device=pc', imagem:IMG_BASE+'fettuccine-file-mignon.jpg',
+   ingredientes:'Para a carne:\n500g de filé mignon em cubos\nSal e pimenta-do-reino\n1 fio de azeite\n1 colher (sopa) de manteiga\n1/2 cebola picada\n2 dentes de alho\n1 colher (sopa) de farinha de trigo\n1 colher (sopa) de extrato de tomate\n150ml de vinho tinto\n\nPara a massa:\n250g de massa (fettuccine)\n200ml de creme de leite fresco\n50g de parmesão ralado\nSal e pimenta-do-reino a gosto\nUm pouco da água do cozimento, se precisar',
+   modo:'Tempere o filé com sal e pimenta e sele no azeite com a manteiga. Junte a cebola e o alho, polvilhe a farinha, acrescente o extrato de tomate e o vinho tinto e deixe reduzir formando um molho. Cozinhe a massa e finalize com o creme de leite fresco, o parmesão, sal, pimenta e, se precisar, um pouco da água do cozimento. Sirva a carne ao lado da massa cremosa.'}
 ];
 
 let recipes = [];
@@ -439,11 +483,11 @@ let currentIngId = null;
 let lastCardapio = [];
 
 function loadRecipes(){
-  const saved = localStorage.getItem('receitas_cardapios_v16');
+  const saved = localStorage.getItem('receitas_cardapios_v18');
   if(saved){ recipes = JSON.parse(saved); }
   else { recipes = SEED_RECIPES.map((r,i)=>({...r, id: 'r'+i})); saveRecipes(); }
 }
-function saveRecipes(){ localStorage.setItem('receitas_cardapios_v16', JSON.stringify(recipes)); }
+function saveRecipes(){ localStorage.setItem('receitas_cardapios_v18', JSON.stringify(recipes)); }
 
 let currentTab = 'todas';
 
